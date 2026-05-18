@@ -6,10 +6,11 @@ import 'package:flame/effects.dart';
 import 'package:flutter/animation.dart';
 
 class RunnerRhenne extends SpriteComponent with CollisionCallbacks {
-  RunnerRhenne(Sprite sprite)
+  RunnerRhenne(Sprite sprite, {required double laneWidth})
       : super(
           sprite: sprite,
-          size: Vector2.all(100),
+          // Cap at 80% of one lane so the frog always fits with visible margin.
+          size: Vector2.all((laneWidth * 0.80).clamp(0, 88)),
           anchor: Anchor.center,
         );
 

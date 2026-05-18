@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'lara_audio.dart';
 import 'lara_theme.dart';
 
 /// Sticker-style button with a flat hard shadow that gives a 3-D "pressed
@@ -81,6 +82,7 @@ class _LaraButtonState extends State<LaraButton> {
       onTapDown: (_) => setState(() => _pressed = true),
       onTapUp: (_) {
         setState(() => _pressed = false);
+        LaraAudio.playSfx(LaraSfx.button);
         widget.onPressed();
       },
       onTapCancel: () => setState(() => _pressed = false),

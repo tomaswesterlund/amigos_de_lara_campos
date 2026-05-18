@@ -2,6 +2,8 @@ import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
+import 'lara_audio.dart';
+
 /// Shared base class for every mini-game in the demo.
 ///
 /// Wires:
@@ -9,13 +11,19 @@ import 'package:flutter/material.dart';
 /// - a top-of-screen score HUD overlay key (`hud`)
 /// - a centred game-over / win overlay key (`gameOver`)
 /// - a centred pause overlay key (`pause`)
+/// - optional looping background music via [LaraAudio]
 ///
 /// Individual games own their score/state and just call [setScore],
-/// [showGameOver], etc.
+/// [showGameOver], etc. Pass a [bgm] asset path (relative to assets/audio/)
+/// to have the base class start/stop music automatically.
 abstract class LaraGame extends FlameGame {
-  LaraGame({required this.gradient});
+  LaraGame({required this.gradient, this.bgm});
 
   final Gradient gradient;
+
+  /// Asset path relative to `assets/audio/`, e.g. `'bgm/rhenne_theme.m4a'`.
+  /// Null means no background music for this game.
+  final String? bgm;
 
   int _score = 0;
   int get score => _score;
@@ -42,6 +50,7 @@ abstract class LaraGame extends FlameGame {
     _onRestart = onRestart;
     pauseEngine();
     overlays.add('gameOver');
+    LaraAudio.stopBgm();
   }
 
   void clearGameOver() {
@@ -49,12 +58,20 @@ abstract class LaraGame extends FlameGame {
     _gameOverMessage = null;
     _onRestart = null;
     resumeEngine();
+    if (bgm != null) LaraAudio.startBgm(bgm!);
   }
 
   @override
   Future<void> onLoad() async {
     add(_GradientBackground(gradient: gradient));
     overlays.add('hud');
+    if (bgm != null) await LaraAudio.startBgm(bgm!);
+  }
+
+  @override
+  void onDetach() {
+    super.onDetach();
+    LaraAudio.stopBgm();
   }
 }
 

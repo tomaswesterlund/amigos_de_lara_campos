@@ -1,6 +1,8 @@
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
+import 'coin_reward_overlay.dart';
+import 'lara_audio.dart';
 import 'lara_button.dart';
 import 'lara_game.dart';
 import 'lara_theme.dart';
@@ -23,6 +25,7 @@ class GameScaffold extends StatefulWidget {
     required this.builder,
     this.scoreLabel = 'Puntos',
     this.gameOverBuilder,
+    this.coinReward,
   });
 
   final String title;
@@ -33,15 +36,21 @@ class GameScaffold extends StatefulWidget {
   /// "¡Bien hecho!" card with restart + menu buttons is used.
   final GameOverOverlayBuilder? gameOverBuilder;
 
+  /// If set, a coin reward modal is shown first (before the game-over overlay).
+  /// The function receives the finished game and returns the number of coins earned.
+  final int Function(LaraGame game)? coinReward;
+
   @override
   State<GameScaffold> createState() => _GameScaffoldState();
 }
 
 class _GameScaffoldState extends State<GameScaffold> {
   late LaraGame _game = widget.builder();
+  bool _coinPhaseComplete = false;
 
   void _restart() {
     setState(() {
+      _coinPhaseComplete = false;
       _game = widget.builder();
     });
   }
@@ -51,13 +60,7 @@ class _GameScaffoldState extends State<GameScaffold> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        actions: [
-          IconButton(
-            tooltip: 'Reiniciar',
-            icon: const Icon(Icons.refresh_rounded),
-            onPressed: _restart,
-          ),
-        ],
+        actions: [const _AudioModeButton()],
       ),
       body: GameWidget<LaraGame>(
         key: ValueKey(_game),
@@ -68,6 +71,13 @@ class _GameScaffoldState extends State<GameScaffold> {
                 score: game.score,
               ),
           'gameOver': (context, game) {
+            // Phase A: show coin reward before game-over if configured.
+            if (widget.coinReward != null && !_coinPhaseComplete) {
+              return CoinRewardOverlay(
+                coins: widget.coinReward!(game),
+                onContinue: () => setState(() => _coinPhaseComplete = true),
+              );
+            }
             void restart() {
               game.clearGameOver();
               _restart();
@@ -88,6 +98,44 @@ class _GameScaffoldState extends State<GameScaffold> {
     );
   }
 }
+
+// ─── 3-state audio mode button ────────────────────────────────────────────────
+
+class _AudioModeButton extends StatefulWidget {
+  const _AudioModeButton();
+
+  @override
+  State<_AudioModeButton> createState() => _AudioModeButtonState();
+}
+
+class _AudioModeButtonState extends State<_AudioModeButton> {
+  static IconData _icon(AudioMode m) => switch (m) {
+        AudioMode.on     => Icons.volume_up_rounded,
+        AudioMode.bgmOff => Icons.music_off_rounded,
+        AudioMode.off    => Icons.volume_off_rounded,
+      };
+
+  static String _tooltip(AudioMode m) => switch (m) {
+        AudioMode.on     => 'Todo encendido',
+        AudioMode.bgmOff => 'Música apagada',
+        AudioMode.off    => 'Todo silenciado',
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    final mode = LaraAudio.mode;
+    return IconButton(
+      tooltip: _tooltip(mode),
+      icon: Icon(_icon(mode)),
+      onPressed: () {
+        LaraAudio.cycleMode();
+        setState(() {});
+      },
+    );
+  }
+}
+
+// ─── HUD overlay ─────────────────────────────────────────────────────────────
 
 class _HudOverlay extends StatelessWidget {
   const _HudOverlay({required this.label, required this.score});
@@ -120,6 +168,8 @@ class _HudOverlay extends StatelessWidget {
     );
   }
 }
+
+// ─── Game-over overlay ───────────────────────────────────────────────────────
 
 class _GameOverOverlay extends StatelessWidget {
   const _GameOverOverlay({

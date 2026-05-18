@@ -4,6 +4,7 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 
+import '../../shared/lara_audio.dart';
 import '../../shared/lara_game.dart';
 import '../../shared/lara_theme.dart';
 import 'components/cloud.dart';
@@ -17,7 +18,7 @@ import 'leaderboard.dart';
 /// switch lanes. Catch corazones for points, dodge rocks.
 class RhenneRunGame extends LaraGame
     with HasCollisionDetection, TapCallbacks, DragCallbacks {
-  RhenneRunGame() : super(gradient: LaraGradients.pond);
+  RhenneRunGame() : super(gradient: LaraGradients.pond, bgm: LaraBgm.rhenne);
 
   static const _laneCount = 3;
   static const _baseScroll = 280.0;
@@ -27,7 +28,9 @@ class RhenneRunGame extends LaraGame
   RunnerRhenne? _rhenne;
   Sprite? _heartSprite;
   Sprite? _goldenHeartSprite;
+  Sprite? _pinkHeartSprite;
   Sprite? _rockSprite;
+  Sprite? _birdSprite;
   Sprite? _lilypadSprite;
   int _lane = 1;
   int _score = 0;
@@ -54,9 +57,11 @@ class RhenneRunGame extends LaraGame
     await super.onLoad();
     _heartSprite = await loadSprite('corazon.png');
     _goldenHeartSprite = await loadSprite('corazon_yellow.png');
-    _rockSprite = await loadSprite('obstacle_rock.png');
+    _pinkHeartSprite = await loadSprite('corazon_pink.png');
+    _rockSprite = await loadSprite('obstacle_water_rock.png');
+    _birdSprite = await loadSprite('bird_enemy.png');
     _lilypadSprite = await loadSprite('lilypad.png');
-    final r = RunnerRhenne(await loadSprite('rhenne.png'));
+    final r = RunnerRhenne(await loadSprite('rhenne.png'), laneWidth: _laneWidth);
     _rhenne = r;
     add(_LaneStripes());
     add(r);
@@ -106,8 +111,10 @@ class RhenneRunGame extends LaraGame
   void _spawn() {
     final heart = _heartSprite;
     final golden = _goldenHeartSprite;
+    final pink = _pinkHeartSprite;
     final rock = _rockSprite;
-    if (heart == null || golden == null || rock == null) return;
+    final bird = _birdSprite;
+    if (heart == null || golden == null || pink == null || rock == null || bird == null) return;
 
     // Pick 1–2 lanes to fill this wave so the player always has a safe lane.
     final lanesShuffled = List.generate(_laneCount, (i) => i)..shuffle(_rng);
@@ -115,18 +122,24 @@ class RhenneRunGame extends LaraGame
     for (var i = 0; i < fillCount; i++) {
       final lane = lanesShuffled[i];
       final roll = _rng.nextDouble();
+      // 6% golden | 20% pink | 32% red | 22% rock | 20% bird
       final LaneItemKind kind;
       final Sprite sprite;
       if (roll < 0.06) {
-        // Rare golden heart — 6% of items.
         kind = LaneItemKind.goldenHeart;
         sprite = golden;
-      } else if (roll < 0.60) {
+      } else if (roll < 0.26) {
+        kind = LaneItemKind.pinkHeart;
+        sprite = pink;
+      } else if (roll < 0.58) {
         kind = LaneItemKind.heart;
         sprite = heart;
-      } else {
+      } else if (roll < 0.80) {
         kind = LaneItemKind.rock;
         sprite = rock;
+      } else {
+        kind = LaneItemKind.bird;
+        sprite = bird;
       }
       add(
         LaneItem(sprite: sprite, kind: kind, lane: lane)
@@ -196,13 +209,19 @@ class RhenneRunGame extends LaraGame
     if (!_running) return;
     final pos = item.position.clone();
     final golden = item.kind == LaneItemKind.goldenHeart;
+    final isPink = item.kind == LaneItemKind.pinkHeart;
     item.removeFromParent();
+    LaraAudio.playSfx(points >= 10 ? LaraSfx.hitPerfect : points == 3 ? LaraSfx.coin : LaraSfx.hitGood);
     add(
       ScorePop(
         startPosition: pos,
         points: points,
-        shadowColor: golden ? const Color(0xFFCB8A1A) : const Color(0xFFE33282),
-        fontSize: golden ? 38 : 28,
+        shadowColor: golden
+            ? const Color(0xFFCB8A1A)
+            : isPink
+                ? LaraColors.pink
+                : const Color(0xFFE33282),
+        fontSize: golden ? 38 : isPink ? 32 : 28,
       ),
     );
     _score += points;
@@ -211,6 +230,7 @@ class RhenneRunGame extends LaraGame
 
   Future<void> onCrash() async {
     if (!_running) return;
+    LaraAudio.playSfx(LaraSfx.miss);
     _running = false;
     final r = _rhenne;
     if (r != null) {

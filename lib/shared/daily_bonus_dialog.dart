@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'coin_wallet.dart';
+import 'lara_audio.dart';
 import 'lara_button.dart';
 import 'lara_theme.dart';
 
@@ -8,6 +9,10 @@ class DailyBonusDialog extends StatefulWidget {
   const DailyBonusDialog({super.key});
 
   static bool _shown = false;
+
+  /// Prevents the dialog from appearing. Call in test setUp to keep tests clean.
+  @visibleForTesting
+  static void suppressForTest() => _shown = true;
 
   static void showIfNeeded(BuildContext context) {
     if (_shown) return;
@@ -101,6 +106,7 @@ class _DailyBonusDialogState extends State<DailyBonusDialog>
     for (int i = 0; i < 5; i++) {
       if (!mounted) return;
       _count.value = i + 1;
+      LaraAudio.playSfx(LaraSfx.coin);
       if (i < 4) {
         await Future<void>.delayed(const Duration(milliseconds: 144));
       }

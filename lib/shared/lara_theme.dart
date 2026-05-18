@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class LaraColors {
   static const pink = Color(0xFFFF5CA8);
   static const magenta = Color(0xFFE33282);
+  static const magentaDark = Color(0xFFA01B5C);
   static const mint = Color(0xFF72E0C4);
   static const yellow = Color(0xFFFFD640);
   static const sky = Color(0xFFB8E5FF);
@@ -31,6 +32,16 @@ class LaraGradients {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [LaraColors.pink, LaraColors.yellow, LaraColors.mint],
+  );
+
+  static const night = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [
+      Color(0xFF0E0B2E),
+      Color(0xFF1A1050),
+      Color(0xFF2A1468),
+    ],
   );
 }
 

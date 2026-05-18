@@ -1,7 +1,20 @@
+import 'package:flutter/foundation.dart' show visibleForTesting;
+
 import 'coin_wallet.dart';
 
 class CollectiblesState {
   CollectiblesState._();
+
+  @visibleForTesting
+  static void resetForTest() {
+    _unlocked
+      ..clear()
+      ..addAll({
+        'rhenne': {0},
+        'galleta': {0},
+        'heart': {0},
+      });
+  }
 
   static const int count = 5;
 
@@ -19,6 +32,7 @@ class CollectiblesState {
 
   /// Attempts to spend coins and unlock the card. Returns true on success.
   static bool unlock(String charKey, int index) {
+    if (!_unlocked.containsKey(charKey)) return false;
     if (index < 0 || index >= costs.length) return false;
     if (isUnlocked(charKey, index)) return false;
     if (!CoinWallet.spend(costs[index])) return false;

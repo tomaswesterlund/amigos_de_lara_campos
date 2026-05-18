@@ -17,6 +17,20 @@ class LeaderboardEntry {
 class RhenneRunLeaderboard {
   RhenneRunLeaderboard._();
 
+  // ignore: invalid_use_of_visible_for_testing_member
+  static void resetForTest() {
+    _entries
+      ..clear()
+      ..addAll([
+        const LeaderboardEntry(name: 'Sofía', score: 142),
+        const LeaderboardEntry(name: 'Camila', score: 118),
+        const LeaderboardEntry(name: 'Mateo', score: 95),
+        const LeaderboardEntry(name: 'Valentina', score: 76),
+        const LeaderboardEntry(name: 'Diego', score: 54),
+      ]);
+    _latest = null;
+  }
+
   static const currentPlayerName = 'Lupita';
 
   static final List<LeaderboardEntry> _entries = [

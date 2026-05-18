@@ -17,6 +17,19 @@ class MemoryMatchEntry {
 class MemoryMatchLeaderboard {
   MemoryMatchLeaderboard._();
 
+  static void resetForTest() {
+    _entries
+      ..clear()
+      ..addAll([
+        const MemoryMatchEntry(name: 'Sofía', moves: 8),
+        const MemoryMatchEntry(name: 'Camila', moves: 11),
+        const MemoryMatchEntry(name: 'Valentina', moves: 14),
+        const MemoryMatchEntry(name: 'Isabella', moves: 18),
+        const MemoryMatchEntry(name: 'Daniela', moves: 22),
+      ]);
+    _latest = null;
+  }
+
   static const currentPlayerName = 'Lupita';
 
   static final List<MemoryMatchEntry> _entries = [

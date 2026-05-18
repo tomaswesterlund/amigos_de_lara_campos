@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 
+import '../../shared/lara_audio.dart';
 import '../../shared/lara_game.dart';
 import '../../shared/lara_theme.dart';
 import 'components/lily_pad.dart';
@@ -13,7 +14,7 @@ import 'components/rhenne.dart';
 /// Tap to hop in place; if a pad is under Rhenné when he lands → score+1.
 /// Land in the water → game over. Reach 8 in a row → Reina celebrates.
 class RhenneJumpGame extends LaraGame with TapCallbacks {
-  RhenneJumpGame() : super(gradient: LaraGradients.pond);
+  RhenneJumpGame() : super(gradient: LaraGradients.pond, bgm: LaraBgm.rhenne);
 
   static const _padInterval = 1.1;
   static const _basePadSpeed = 130.0;
@@ -85,6 +86,7 @@ class RhenneJumpGame extends LaraGame with TapCallbacks {
   void onTapDown(TapDownEvent event) {
     final r = _rhenne;
     if (!_running || r == null || r.isJumping) return;
+    LaraAudio.playSfx(LaraSfx.hitGood);
     r.hop(onLand: _evaluateLanding);
   }
 
@@ -103,13 +105,16 @@ class RhenneJumpGame extends LaraGame with TapCallbacks {
     if (landed) {
       _streak++;
       setScore(_streak);
+      LaraAudio.playSfx(LaraSfx.hitPerfect);
       if (_streak >= _winStreak && !q.celebrating) {
         _running = false;
+        LaraAudio.playSfx(LaraSfx.coin);
         q.celebrate();
         showGameOver('¡Encontraste a Reina!\nRhenné está feliz', () {});
       }
     } else {
       _running = false;
+      LaraAudio.playSfx(LaraSfx.miss);
       showGameOver('¡Splash! Rhenné cayó al agua.\nPuntos: $_streak', () {});
     }
   }

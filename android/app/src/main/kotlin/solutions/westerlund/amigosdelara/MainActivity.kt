@@ -1,4 +1,4 @@
-package com.laracampos.lara_demo
+package solutions.westerlund.amigosdelara
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -4,6 +4,7 @@ import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 
+import '../../shared/lara_audio.dart';
 import '../../shared/lara_game.dart';
 import '../../shared/lara_theme.dart';
 import 'components/falling_treat.dart';
@@ -12,7 +13,7 @@ import 'components/falling_treat.dart';
 /// dodge rocks. Catching = points; hitting a rock = game over.
 class GalletaCatchGame extends LaraGame
     with HasCollisionDetection, DragCallbacks, TapCallbacks {
-  GalletaCatchGame() : super(gradient: LaraGradients.sunny);
+  GalletaCatchGame() : super(gradient: LaraGradients.sunny, bgm: LaraBgm.galleta);
 
   Sprite? _heartSprite;
   Sprite? _bonePinkSprite;
@@ -118,12 +119,15 @@ class GalletaCatchGame extends LaraGame
     t.removeFromParent();
     switch (t.kind) {
       case TreatKind.heart:
+        LaraAudio.playSfx(LaraSfx.hitGood);
         _score += 2;
         break;
       case TreatKind.bone:
+        LaraAudio.playSfx(LaraSfx.hitGood);
         _score += 1;
         break;
       case TreatKind.rock:
+        LaraAudio.playSfx(LaraSfx.miss);
         _running = false;
         showGameOver('¡Ay! Galleta tropezó con una roca.\nPuntos: $_score', () {});
         return;

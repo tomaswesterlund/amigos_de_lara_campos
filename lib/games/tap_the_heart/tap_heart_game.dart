@@ -5,6 +5,7 @@ import 'package:flame/effects.dart';
 import 'package:flame/text.dart';
 import 'package:flutter/material.dart';
 
+import '../../shared/lara_audio.dart';
 import '../../shared/lara_game.dart';
 import '../../shared/lara_theme.dart';
 import 'components/falling_heart.dart';
@@ -12,7 +13,7 @@ import 'tap_heart_leaderboard.dart';
 
 /// Hearts fall from the sky; tap them before they hit the grass. Miss 3 → game over.
 class TapHeartGame extends LaraGame {
-  TapHeartGame() : super(gradient: LaraGradients.party);
+  TapHeartGame() : super(gradient: LaraGradients.sunny, bgm: LaraBgm.corazon);
 
   static const _maxLives = 3;
   static const _floorHeight = 72.0;
@@ -108,6 +109,9 @@ class TapHeartGame extends LaraGame {
   // Heart removes itself via _pop(); game just updates state and shows popup.
   void onHeartTapped(FallingHeart heart) {
     if (!_running) return;
+    LaraAudio.playSfx(
+      heart.points >= 10 ? LaraSfx.hitPerfect : heart.points >= 3 ? LaraSfx.coin : LaraSfx.hitGood,
+    );
     _hits += 1;
     _score += heart.points;
     setScore(_score);
@@ -117,6 +121,7 @@ class TapHeartGame extends LaraGame {
   // Heart calls this the instant it touches the grass, then animates itself away.
   void onHeartMissed(FallingHeart heart) {
     if (!_running) return;
+    LaraAudio.playSfx(LaraSfx.miss);
     _flashMiss();
     _lives -= 1;
     if (_lives <= 0) {
@@ -200,7 +205,7 @@ class _GrassFloor extends PositionComponent
   void render(Canvas canvas) {
     // Soil layers.
     canvas.drawRect(
-      Rect.fromLTWH(0, 14, size.x, size.y - 14),
+      Rect.fromLTWH(0, 0, size.x, size.y),
       Paint()..color = const Color(0xFF2E7D32),
     );
     canvas.drawRect(

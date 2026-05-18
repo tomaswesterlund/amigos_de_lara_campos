@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
+import '../../shared/lara_audio.dart';
 import '../../shared/lara_game.dart';
 import '../../shared/lara_theme.dart';
 import 'components/bird_obstacle.dart';
@@ -24,7 +25,7 @@ import 'leaderboard.dart';
 ///     before/after it, giving the player a skill-reward trade-off.
 ///   - Two rocks are always at least 1 chunk apart.
 class GalletaRunGame extends LaraGame with TapCallbacks, HasCollisionDetection {
-  GalletaRunGame() : super(gradient: LaraGradients.sunny);
+  GalletaRunGame() : super(gradient: LaraGradients.sunny, bgm: LaraBgm.galleta);
 
   static const _baseSpeed = 220.0;
   static const _gravity = 1800.0;
@@ -53,6 +54,7 @@ class GalletaRunGame extends LaraGame with TapCallbacks, HasCollisionDetection {
   GalletaRunEntry? lastEntry;
 
   double get groundY => size.y * 0.82;
+  double get speed => _speed;
 
   // ─── Lifecycle ───────────────────────────────────────────────────────────────
 
@@ -273,6 +275,7 @@ class GalletaRunGame extends LaraGame with TapCallbacks, HasCollisionDetection {
     final g = _galleta;
     if (g == null) return;
     if (!g.airborne) {
+      LaraAudio.playSfx(LaraSfx.hitGood);
       g.velocityY = _jumpVelocity;
       g.airborne = true;
     }
@@ -281,6 +284,9 @@ class GalletaRunGame extends LaraGame with TapCallbacks, HasCollisionDetection {
   // ─── Callbacks from components ────────────────────────────────────────────────
 
   void onHeartCollected(CorazonPickup pickup) {
+    LaraAudio.playSfx(
+      pickup.points >= 10 ? LaraSfx.hitPerfect : pickup.points >= 3 ? LaraSfx.coin : LaraSfx.hitGood,
+    );
     add(ScorePopup(points: pickup.points, spawnPosition: pickup.position.clone()));
     pickup.removeFromParent();
     _score += pickup.points;
@@ -288,6 +294,7 @@ class GalletaRunGame extends LaraGame with TapCallbacks, HasCollisionDetection {
   }
 
   void onBoneCollected(BonePickup pickup) {
+    LaraAudio.playSfx(LaraSfx.hitGood);
     add(ScorePopup(points: 2, spawnPosition: pickup.position.clone()));
     pickup.removeFromParent();
     _score += 2;
@@ -296,6 +303,7 @@ class GalletaRunGame extends LaraGame with TapCallbacks, HasCollisionDetection {
 
   void onCrash() {
     if (!_running) return;
+    LaraAudio.playSfx(LaraSfx.miss);
     _running = false;
     lastEntry = GalletaRunLeaderboard.submit(_score);
     showGameOver('¡Galleta tropezó!\nPuntos: $_score', () {});

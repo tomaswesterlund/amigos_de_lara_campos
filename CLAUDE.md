@@ -3,7 +3,7 @@
 **lara_demo** is a Flutter + Flame mini-game collection built around the
 universe of Mexican child entertainer **Lara Campos** and her cast of
 characters: Rhenné (her green frog), Reina (Rhenné's pink-frog
-girlfriend), Galleta (her caramel-coloured dog), and the Corazón Amigos
+girlfriend), Galleta (her small white fluffy dog), and the Corazón Amigos
 heart motif that ties them together.
 
 The app lives in `lib/main.dart` → `lib/home_screen.dart`, which presents
@@ -166,6 +166,27 @@ flutter run -d <android-emu>     # Android emu
 The dummy in-memory leaderboard in `rhenne_run/leaderboard.dart` seeds
 five fake players and treats the current run as "Lupita". It resets on
 process restart — persistence is intentionally out of scope.
+
+## Testing
+
+Run `flutter test` before committing. Tests must stay green — a failing test blocks merge.
+
+**Layered strategy:**
+
+| Layer | Location | Tool | When to write |
+|---|---|---|---|
+| Pure Dart unit | `test/unit/` | `flutter_test` | Every state class, leaderboard, pure logic |
+| Flame game | `test/flame/` | `flame_test` | Game lifecycle, board/spawn logic |
+| Widget | `test/widget/` | `flutter_test` | UI components, theme constants |
+
+**Rules:**
+- Every bug fix ships with a regression test that would have caught the bug.
+- State classes (`CoinWallet`, `GameUnlockState`, `CollectiblesState`) must have 100%
+  branch coverage.
+- Do not mock what can be tested directly; only mock platform channels and audio players.
+- Flame game tests use `FlameTester` from `flame_test`; never instantiate `FlameGame`
+  in widget tests.
+- Integration/audio/gesture tests are out of scope — mark them `// TODO: integration`.
 
 ## Out of scope (don't add without asking)
 

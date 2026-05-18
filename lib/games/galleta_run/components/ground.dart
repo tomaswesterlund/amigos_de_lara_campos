@@ -3,11 +3,12 @@ import 'dart:ui';
 import 'package:flame/components.dart';
 
 import '../../../shared/lara_theme.dart';
+import '../galleta_run_game.dart';
 
 /// Full-width ground strip rendered at the bottom of the playfield.
 /// A grass cap (rhenneGreen) sits on top of a dirt body (galletaBrown)
-/// with a subtle alternating stripe texture.
-class Ground extends PositionComponent {
+/// with a scrolling alternating stripe texture.
+class Ground extends PositionComponent with HasGameReference<GalletaRunGame> {
   Ground({required double groundY, required double screenWidth, required double screenHeight})
       : super(
           position: Vector2(0, groundY),
@@ -16,6 +17,13 @@ class Ground extends PositionComponent {
         );
 
   static const _capHeight = 14.0;
+  double _scrollOffset = 0;
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    _scrollOffset += game.speed * dt;
+  }
 
   @override
   void render(Canvas canvas) {
@@ -34,9 +42,9 @@ class Ground extends PositionComponent {
       Rect.fromLTWH(0, _capHeight, size.x, size.y - _capHeight),
       Paint()..color = LaraColors.galletaBrown,
     );
-    // Subtle alternating stripes for texture
+    // Scrolling alternating stripes for texture
     final stripe = Paint()..color = const Color(0x18000000);
-    var x = 0.0;
+    var x = -(_scrollOffset % 36);
     while (x < size.x) {
       canvas.drawRect(
         Rect.fromLTWH(x, _capHeight, 18, size.y - _capHeight),

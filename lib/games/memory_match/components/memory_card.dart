@@ -3,8 +3,9 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
-import 'package:flutter/animation.dart';
+import 'package:flutter/material.dart';
 
+import '../../../shared/lara_theme.dart';
 import '../memory_match_game.dart';
 
 class MemoryCard extends SpriteComponent
@@ -109,6 +110,39 @@ class MemoryCard extends SpriteComponent
     );
     await second.future;
     _animating = false;
+  }
+
+  @override
+  void render(Canvas canvas) {
+    if (!faceUp) {
+      super.render(canvas);
+      return;
+    }
+
+    const radius = Radius.circular(8);
+    const borderWidth = 2.5;
+    const padding = 6.0;
+
+    final rect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(0, 0, size.x, size.y),
+      radius,
+    );
+
+    canvas.drawRRect(rect, Paint()..color = Colors.white);
+    canvas.drawRRect(
+      rect,
+      Paint()
+        ..color = matched ? LaraColors.yellow : LaraColors.mint
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = borderWidth,
+    );
+
+    const p = padding;
+    sprite?.render(
+      canvas,
+      position: Vector2.all(p),
+      size: Vector2(size.x - p * 2, size.y - p * 2),
+    );
   }
 
   @override
