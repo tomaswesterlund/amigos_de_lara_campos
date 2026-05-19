@@ -1,6 +1,6 @@
 {
-    "name": "lara_demo",
-    "short_name": "lara_demo",
+    "name": "Amigos de Lara!",
+    "short_name": "Amigos de Lara!",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

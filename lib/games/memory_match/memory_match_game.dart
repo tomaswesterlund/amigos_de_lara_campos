@@ -43,16 +43,42 @@ class MemoryMatchGame extends LaraGame {
   bool _busy = false;
   int _matches = 0;
   int _moves = 0;
+  int _coinsCollected = 0;
   int _pairsThisRound = 0;
   bool _built = false;
+  int? _pendingDifficultyIdx;
   MemoryMatchEntry? lastEntry;
 
-  /// Changes difficulty and rebuilds the board immediately.
+  int get coinsCollected => _coinsCollected;
+
+  bool get _isGameInProgress => _moves > 0 || _firstPick != null || _matches > 0;
+
+  /// Changes difficulty; shows a confirmation overlay if a game is in progress.
   void setDifficulty(int idx) {
     final next = idx.clamp(0, 2);
     if (next == _diffIdx) return;
+    if (_built && _isGameInProgress) {
+      _pendingDifficultyIdx = next;
+      overlays.add('difficultyConfirm');
+      return;
+    }
     _diffIdx = next;
     if (_built) _buildBoard();
+  }
+
+  void confirmDifficulty() {
+    overlays.remove('difficultyConfirm');
+    final pending = _pendingDifficultyIdx;
+    _pendingDifficultyIdx = null;
+    if (pending != null) {
+      _diffIdx = pending;
+      _buildBoard();
+    }
+  }
+
+  void cancelDifficulty() {
+    overlays.remove('difficultyConfirm');
+    _pendingDifficultyIdx = null;
   }
 
   /// Returns all collectible image names that are currently unlocked,
@@ -99,7 +125,6 @@ class MemoryMatchGame extends LaraGame {
       _faces[n] = await loadSprite(n);
     }
     _buildBoard();
-    add(_DifficultyControls());
   }
 
   void _buildBoard() {
@@ -110,26 +135,28 @@ class MemoryMatchGame extends LaraGame {
 
     // Pick _pairsPerGame faces at random. Cycle the pool if fewer distinct faces
     // are available than pairs needed (e.g. hard mode with few collectibles unlocked).
-    final pool = _faces.keys.toList()..shuffle(Random());
+    final rng = Random();
+    final pool = _faces.keys.toList()..shuffle(rng);
     final selected = <String>[];
     while (selected.length < _pairsPerGame) {
       final remaining = _pairsPerGame - selected.length;
       selected.addAll(pool.take(remaining));
-      if (selected.length < _pairsPerGame) pool.shuffle(Random());
+      if (selected.length < _pairsPerGame) pool.shuffle(rng);
     }
+
     _pairsThisRound = selected.length;
 
-    final deck = <String>[for (final n in selected) ...[n, n]]..shuffle(Random());
+    final deck = <String>[for (final n in selected) ...[n, n]]..shuffle(rng);
     final cardSize = _cardSize();
     final (startX, startY) = _origin(cardSize);
 
     for (var r = 0; r < _rows; r++) {
       for (var c = 0; c < _cols; c++) {
-        final face = deck[r * _cols + c];
+        final faceId = deck[r * _cols + c];
         final card = MemoryCard(
           back: _back,
-          face: _faces[face]!,
-          faceId: face,
+          face: _faces[faceId]!,
+          faceId: faceId,
           col: c,
           row: r,
         )
@@ -159,8 +186,7 @@ class MemoryMatchGame extends LaraGame {
 
   double _cardSize() {
     final cardW = (size.x - 64 - 12 * (_cols - 1)) / _cols;
-    // 260 instead of 200 to leave room for the difficulty controls row at bottom.
-    final cardH = (size.y - 260 - 12 * (_rows - 1)) / _rows;
+    final cardH = (size.y - 200 - 12 * (_rows - 1)) / _rows;
     return min(cardW, cardH).clamp(60.0, 160.0);
   }
 
@@ -209,7 +235,6 @@ class MemoryMatchGame extends LaraGame {
       _matches += 1;
       setScore(_moves);
 
-      // Float a "+1" between the two matched cards.
       final mid = Vector2(
         (first.position.x + card.position.x) / 2,
         (first.position.y + card.position.y) / 2,
@@ -217,6 +242,7 @@ class MemoryMatchGame extends LaraGame {
       add(_ScorePopup(mid));
 
       if (_matches == _pairsThisRound) {
+        _coinsCollected = 1;
         lastEntry = MemoryMatchLeaderboard.submit(_moves);
         LaraAudio.playSfx(LaraSfx.unlock);
         await Future<void>.delayed(const Duration(milliseconds: 600));
@@ -349,3 +375,4 @@ class _ScorePopup extends TextComponent {
     ));
   }
 }
+

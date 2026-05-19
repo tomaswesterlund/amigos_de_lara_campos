@@ -15,6 +15,33 @@ class LaraAudio {
   static String? _activeBgm;
   static AudioPlayer? _bgmPlayer;
 
+  static const _poolSize = 4;
+  static final _sfxPool = <AudioPlayer>[];
+  static int _poolIndex = 0;
+
+  /// Call once from main() before runApp. Pre-warms the SFX player pool and
+  /// configures the platform audio session to allow BGM + SFX to coexist.
+  static Future<void> init() async {
+    await AudioPlayer.global.setAudioContext(AudioContext(
+      iOS: AudioContextIOS(
+        category: AVAudioSessionCategory.playback,
+        options: {AVAudioSessionOptions.mixWithOthers},
+      ),
+      android: AudioContextAndroid(
+        audioFocus: AndroidAudioFocus.gainTransientMayDuck,
+        contentType: AndroidContentType.music,
+        usageType: AndroidUsageType.game,
+        isSpeakerphoneOn: false,
+        stayAwake: false,
+      ),
+    ));
+    for (var i = 0; i < _poolSize; i++) {
+      final p = AudioPlayer();
+      await p.setReleaseMode(ReleaseMode.release);
+      _sfxPool.add(p);
+    }
+  }
+
   /// Cycles: on → bgmOff → off → on
   static void cycleMode() {
     switch (_mode) {
@@ -57,8 +84,9 @@ class LaraAudio {
   static Future<void> playSfx(String asset) async {
     if (_mode == AudioMode.off) return;
     try {
-      final player = AudioPlayer();
-      await player.setReleaseMode(ReleaseMode.release);
+      final player = _sfxPool[_poolIndex];
+      _poolIndex = (_poolIndex + 1) % _poolSize;
+      await player.stop();
       await player.play(AssetSource(asset), volume: 0.85);
     } catch (e) {
       debugPrint('LaraAudio.playSfx($asset): $e');

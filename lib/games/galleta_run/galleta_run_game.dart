@@ -8,6 +8,8 @@ import '../../shared/lara_theme.dart';
 import 'components/bird_obstacle.dart';
 import 'components/bone_pickup.dart';
 import 'components/cloud.dart';
+import 'components/coin_pickup.dart';
+import 'components/coin_pop.dart';
 import 'components/corazon_pickup.dart';
 import 'components/galleta.dart';
 import 'components/ground.dart';
@@ -15,6 +17,7 @@ import 'components/hill.dart';
 import 'components/obstacle.dart';
 import 'components/score_popup.dart';
 import 'components/sky_layer.dart';
+import 'components/tutorial_hint.dart';
 import 'leaderboard.dart';
 
 /// Galleta auto-runs to the right; tap to jump rocks and collect hearts.
@@ -49,9 +52,12 @@ class GalletaRunGame extends LaraGame with TapCallbacks, HasCollisionDetection {
 
   bool _running = true;
   int _score = 0;
+  int _coinsCollected = 0;
 
   /// Set on crash; read by the gameOverBuilder in home_screen.dart.
   GalletaRunEntry? lastEntry;
+
+  int get coinsCollected => _coinsCollected;
 
   double get groundY => size.y * 0.82;
   double get speed => _speed;
@@ -74,6 +80,7 @@ class GalletaRunGame extends LaraGame with TapCallbacks, HasCollisionDetection {
     _galleta = g;
     add(g);
     _placeGalleta();
+    if (!TutorialHint.shown) add(TutorialHint());
   }
 
   void _addBackground() {
@@ -135,10 +142,13 @@ class GalletaRunGame extends LaraGame with TapCallbacks, HasCollisionDetection {
     ));
   }
 
+  // Sink Galleta 10 px into the grass cap so her feet visually touch the ground.
+  static const _groundSink = 10.0;
+
   void _placeGalleta() {
     final g = _galleta;
     if (g == null) return;
-    g.position = Vector2(size.x * 0.22, groundY - g.size.y / 2);
+    g.position = Vector2(size.x * 0.22, groundY - g.size.y / 2 + _groundSink);
   }
 
   @override
@@ -152,7 +162,10 @@ class GalletaRunGame extends LaraGame with TapCallbacks, HasCollisionDetection {
 
   @override
   void update(double dt) {
-    super.update(dt);
+    // Cap dt so a frame spike (e.g. audio player init, app resume) never
+    // causes the jump physics to overshoot and invisibly cancel mid-air.
+    final safeDt = dt.clamp(0.0, 0.05);
+    super.update(safeDt);
     if (!_running) return;
     final g = _galleta;
     if (g == null) return;
@@ -161,18 +174,18 @@ class GalletaRunGame extends LaraGame with TapCallbacks, HasCollisionDetection {
 
     // Gravity / landing
     if (g.airborne) {
-      g.velocityY += _gravity * dt;
-      g.position.y += g.velocityY * dt;
+      g.velocityY += _gravity * safeDt;
+      g.position.y += g.velocityY * safeDt;
       final feetY = g.position.y + g.size.y / 2;
       if (feetY >= groundY) {
-        g.position.y = groundY - g.size.y / 2;
+        g.position.y = groundY - g.size.y / 2 + _groundSink;
         g.velocityY = 0;
         g.airborne = false;
       }
     }
 
     // Chunk-based spawning
-    _chunkTimer -= dt;
+    _chunkTimer -= safeDt;
     if (_chunkTimer <= 0) {
       _chunkTimer = _chunkInterval();
       _spawnChunk();
@@ -201,6 +214,7 @@ class GalletaRunGame extends LaraGame with TapCallbacks, HasCollisionDetection {
     final options = <(String, double)>[
       ('gap', 1.0),
       ('pickup', 1.8),
+      ('coin', 1.4),
     ];
     if (canRock) {
       options.add(('rock', 1.6));
@@ -241,6 +255,10 @@ class GalletaRunGame extends LaraGame with TapCallbacks, HasCollisionDetection {
 
       case 'pickup':
         _addPickup(Vector2(rx, groundY - 80 - _rng.nextDouble() * 100));
+
+      case 'coin':
+        final yOff = groundY - 60 - _rng.nextDouble() * 80;
+        add(CoinPickup(speed: _speed)..position = Vector2(rx, yOff));
 
       // 'gap': nothing spawned
     }
@@ -299,6 +317,14 @@ class GalletaRunGame extends LaraGame with TapCallbacks, HasCollisionDetection {
     pickup.removeFromParent();
     _score += 2;
     setScore(_score);
+  }
+
+  void onCoinCollected(CoinPickup pickup) {
+    if (!_running) return;
+    LaraAudio.playSfx(LaraSfx.coin);
+    add(CoinPop(startPosition: pickup.position.clone()));
+    pickup.removeFromParent();
+    _coinsCollected++;
   }
 
   void onCrash() {

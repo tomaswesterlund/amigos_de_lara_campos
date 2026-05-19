@@ -34,14 +34,13 @@ class RunnerRhenne extends SpriteComponent with CollisionCallbacks {
 
   void slideTo(double x) {
     _slide?.removeFromParent();
-    final dx = x - position.x;
-    _slide = MoveByEffect(
-      Vector2(dx, 0),
+    _slide = MoveToEffect(
+      Vector2(x, position.y),
       EffectController(duration: 0.12, curve: Curves.easeOut),
     );
     add(_slide!);
     // Little tilt with the slide, then settle.
-    final tilt = dx.sign * (pi / 14);
+    final tilt = (x - position.x).sign * (pi / 14);
     add(
       RotateEffect.to(
         tilt,

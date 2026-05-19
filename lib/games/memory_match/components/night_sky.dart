@@ -159,21 +159,35 @@ class _GroundStrip extends PositionComponent with HasGameReference {
     (9.0,  Color(0xFF2E5232)), // mid — richer green
     (9.0,  Color(0xFF3A6E30)), // near ground — most saturated
   ];
-  static const _soilColor = Color(0xFF130906);
+  static const _soilColor = Color(0xFF0E1A10);
+
+  void _refit(Vector2 gameSize) {
+    position = Vector2(0, gameSize.y * _kGroundY);
+    size = Vector2(gameSize.x, gameSize.y * (1 - _kGroundY));
+  }
+
+  @override
+  void onMount() {
+    super.onMount();
+    _refit(game.size);
+  }
+
+  @override
+  void onGameResize(Vector2 gameSize) {
+    super.onGameResize(gameSize);
+    _refit(gameSize);
+  }
 
   @override
   void render(Canvas canvas) {
-    final w = game.size.x;
-    final h = game.size.y;
-    var y = h * _kGroundY;
-
+    var y = 0.0;
     for (final (layerH, color) in _layers) {
-      canvas.drawRect(Rect.fromLTWH(0, y, w, layerH), Paint()..color = color);
+      canvas.drawRect(Rect.fromLTWH(0, y, size.x, layerH), Paint()..color = color);
       y += layerH;
     }
-    // Soil fills the rest of the screen.
+    // Soil fills the rest of the component area.
     canvas.drawRect(
-      Rect.fromLTWH(0, y, w, h - y),
+      Rect.fromLTWH(0, y, size.x, size.y - y),
       Paint()..color = _soilColor,
     );
   }

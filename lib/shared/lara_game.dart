@@ -65,14 +65,12 @@ abstract class LaraGame extends FlameGame {
   Future<void> onLoad() async {
     add(_GradientBackground(gradient: gradient));
     overlays.add('hud');
-    if (bgm != null) await LaraAudio.startBgm(bgm!);
+    // Fire-and-forget: BGM start can hang on some iOS versions (Swift
+    // continuation leak in audioplayers). Don't block onLoad on it.
+    if (bgm != null) LaraAudio.startBgm(bgm!);
   }
 
-  @override
-  void onDetach() {
-    super.onDetach();
-    LaraAudio.stopBgm();
-  }
+
 }
 
 class _GradientBackground extends PositionComponent with HasGameReference<FlameGame> {

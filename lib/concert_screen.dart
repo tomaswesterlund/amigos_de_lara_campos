@@ -40,6 +40,7 @@ class _ConcertScreenState extends State<ConcertScreen> {
           ),
         ),
         child: SafeArea(
+          bottom: false,
           child: Column(
             children: [
               // Custom app bar
@@ -70,7 +71,10 @@ class _ConcertScreenState extends State<ConcertScreen> {
               ),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+                  padding: EdgeInsets.fromLTRB(
+                    20, 16, 20,
+                    32 + MediaQuery.of(context).padding.bottom,
+                  ),
                   child: Column(
                     children: [
                       // Hero card

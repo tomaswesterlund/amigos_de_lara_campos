@@ -2,13 +2,16 @@ import 'dart:math';
 
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
+import 'package:flame/events.dart';
 import 'package:flame/text.dart';
 import 'package:flutter/material.dart';
 
+import '../../shared/coin_draw.dart';
 import '../../shared/lara_audio.dart';
 import '../../shared/lara_game.dart';
 import '../../shared/lara_theme.dart';
 import 'components/falling_heart.dart';
+import 'components/tutorial_hint.dart';
 import 'tap_heart_leaderboard.dart';
 
 /// Hearts fall from the sky; tap them before they hit the grass. Miss 3 → game over.
@@ -25,13 +28,17 @@ class TapHeartGame extends LaraGame {
   final _rng = Random();
   double _spawnTimer = 0;
   double _cloudTimer = 0;
+  double _coinTimer = 0;
   double _spawnInterval = 1.5;
   int _lives = _maxLives;
   int _hits = 0;
   int _score = 0;
+  int _coinsCollected = 0;
   bool _running = true;
 
   TapHeartEntry? lastEntry;
+
+  int get coinsCollected => _coinsCollected;
 
   int get lives => _lives;
 
@@ -47,6 +54,7 @@ class TapHeartGame extends LaraGame {
     _rhenneSprite = await loadSprite('rhenne.png');
     add(_GrassFloor());
     add(_LivesDisplay(rhenneSprite: _rhenneSprite));
+    if (!TutorialHint.shown) add(TutorialHint());
     for (var i = 0; i < 3; i++) {
       _spawnCloud(initial: true);
     }
@@ -58,6 +66,7 @@ class TapHeartGame extends LaraGame {
     if (!_running) return;
     _spawnTimer += dt;
     _cloudTimer += dt;
+    _coinTimer += dt;
     // Kid-friendly pace: gentle acceleration from 1.5s to 0.8s between hearts.
     _spawnInterval = (1.5 - _hits * 0.008).clamp(0.8, 1.5);
     if (_spawnTimer >= _spawnInterval) {
@@ -67,6 +76,10 @@ class TapHeartGame extends LaraGame {
     if (_cloudTimer >= 4.0) {
       _cloudTimer = 0;
       _spawnCloud();
+    }
+    if (_coinTimer >= 5.5) {
+      _coinTimer = 0;
+      _spawnCoin();
     }
   }
 
@@ -106,6 +119,12 @@ class TapHeartGame extends LaraGame {
       ));
   }
 
+  void _spawnCoin() {
+    final fallSpeed = 80.0 + _rng.nextDouble() * 40.0;
+    add(FallingCoin(fallSpeed: fallSpeed)
+      ..position = Vector2(40 + _rng.nextDouble() * (size.x - 80), -40));
+  }
+
   // Heart removes itself via _pop(); game just updates state and shows popup.
   void onHeartTapped(FallingHeart heart) {
     if (!_running) return;
@@ -129,6 +148,13 @@ class TapHeartGame extends LaraGame {
       lastEntry = TapHeartLeaderboard.submit(_score);
       showGameOver('¡Se cayeron los corazones!\nPuntos: $_score', () {});
     }
+  }
+
+  void onCoinTapped(FallingCoin coin) {
+    if (!_running) return;
+    LaraAudio.playSfx(LaraSfx.coin);
+    add(_CoinPop(coin.position.clone()));
+    _coinsCollected++;
   }
 
   void _flashMiss() {
@@ -270,6 +296,86 @@ class _Cloud extends PositionComponent with HasGameReference<TapHeartGame> {
       Rect.fromLTWH(cx - size.x * 0.34, cy, size.x * 0.68, size.y * 0.36),
       paint,
     );
+  }
+}
+
+// ─── Falling coin ─────────────────────────────────────────────────────────────
+
+/// A coin that falls from the sky. Tap it to collect; missing it costs no life.
+class FallingCoin extends PositionComponent
+    with TapCallbacks, HasGameReference<TapHeartGame> {
+  FallingCoin({required this.fallSpeed})
+      : super(size: Vector2.all(52), anchor: Anchor.center);
+
+  final double fallSpeed;
+  bool _tapped = false;
+
+  @override
+  Future<void> onLoad() async {
+    add(ScaleEffect.by(
+      Vector2.all(1.15),
+      EffectController(duration: 0.5, alternate: true, infinite: true, curve: Curves.easeInOut),
+    ));
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    if (_tapped) return;
+    position.y += fallSpeed * dt;
+    if (position.y >= game.floorY + size.y) {
+      removeFromParent();
+    }
+  }
+
+  @override
+  void render(Canvas canvas) {
+    drawCoin(canvas, size.x, size.y);
+  }
+
+  @override
+  void onTapDown(TapDownEvent event) {
+    if (_tapped) return;
+    _tapped = true;
+    game.onCoinTapped(this);
+    _pop();
+  }
+
+  void _pop() {
+    add(ScaleEffect.to(
+      Vector2.all(1.5),
+      EffectController(duration: 0.22, curve: Curves.easeOut),
+      onComplete: removeFromParent,
+    ));
+  }
+}
+
+// ─── Coin pop ─────────────────────────────────────────────────────────────────
+
+/// Floating coin icon + "+1 Moneda" that drifts up and shrinks away on pickup.
+class _CoinPop extends PositionComponent {
+  _CoinPop(Vector2 startPosition)
+      : super(position: startPosition, anchor: Anchor.center, size: Vector2(148, 44));
+
+  @override
+  Future<void> onLoad() async {
+    add(SequenceEffect([
+      MoveByEffect(Vector2(0, -65), EffectController(duration: 0.55, curve: Curves.easeOut)),
+      ScaleEffect.to(Vector2.zero(), EffectController(duration: 0.15, curve: Curves.easeIn)),
+    ], onComplete: removeFromParent));
+  }
+
+  @override
+  void render(Canvas canvas) {
+    drawCoin(canvas, 44, 44);
+    TextPaint(
+      style: const TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.w900,
+        color: Color(0xFFFFD640),
+        shadows: [Shadow(offset: Offset(0, 2), color: Color(0xFF8B5E3C))],
+      ),
+    ).render(canvas, '+1 Moneda', Vector2(52, 11));
   }
 }
 

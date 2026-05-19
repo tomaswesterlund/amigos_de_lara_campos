@@ -81,7 +81,6 @@ void _showCollectibleDetail(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Close button
             Align(
               alignment: Alignment.topRight,
               child: GestureDetector(
@@ -100,7 +99,6 @@ void _showCollectibleDetail(
               ),
             ),
             const SizedBox(height: 8),
-            // Enlarged sprite
             Image.asset(
               assetPath,
               width: 200,
@@ -108,7 +106,6 @@ void _showCollectibleDetail(
               fit: BoxFit.contain,
             ),
             const SizedBox(height: 16),
-            // Label
             Text(
               label,
               style: const TextStyle(
@@ -119,7 +116,6 @@ void _showCollectibleDetail(
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
-            // Share button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -219,7 +215,6 @@ class _LaraSection extends StatelessWidget {
     (label: 'Lara Corazón', asset: 'lara_d3'),
   ];
 
-  // Gradient border trick: outer container with gradient fill, inner white container.
   static const _borderGradient = LinearGradient(
     colors: [LaraColors.pink, LaraColors.magenta, LaraColors.yellow, LaraColors.pink],
     begin: Alignment.topLeft,
@@ -234,7 +229,11 @@ class _LaraSection extends StatelessWidget {
         gradient: _borderGradient,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
-          BoxShadow(offset: const Offset(0, 5), blurRadius: 0, color: _darken(LaraColors.magenta)),
+          BoxShadow(
+            offset: const Offset(0, 5),
+            blurRadius: 0,
+            color: _darken(LaraColors.magenta),
+          ),
         ],
       ),
       padding: const EdgeInsets.all(3),
@@ -246,7 +245,7 @@ class _LaraSection extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Glittery pink→magenta header
+            // Gradient pink→magenta header with stars
             Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
@@ -259,7 +258,6 @@ class _LaraSection extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
               child: Row(
                 children: [
-                  // Lara avatar thumbnail
                   Container(
                     width: 44,
                     height: 44,
@@ -303,13 +301,13 @@ class _LaraSection extends StatelessWidget {
               decoration: BoxDecoration(
                 color: LaraColors.pink.withValues(alpha: 0.10),
               ),
-              child: Row(
+              child: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.qr_code_2_rounded,
+                  Icon(Icons.qr_code_2_rounded,
                       size: 18, color: LaraColors.magenta),
-                  const SizedBox(width: 6),
-                  const Text(
+                  SizedBox(width: 6),
+                  Text(
                     'Desbloquea con el código QR de tu muñeca',
                     style: TextStyle(
                       fontSize: 11,
@@ -348,7 +346,6 @@ class _LaraSection extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Fade + chevron
                   Positioned(
                     right: 0,
                     top: 0,
@@ -410,7 +407,6 @@ class _LaraCardState extends State<_LaraCard>
   late final AnimationController _bounceCtrl;
   late final Animation<double> _bounceScale;
 
-  // Gradient per card slot (cycles pink/magenta/yellow)
   static const _gradients = [
     [LaraColors.pink, LaraColors.magenta],
     [LaraColors.magenta, LaraColors.yellow],
@@ -534,7 +530,6 @@ class _LaraCardState extends State<_LaraCard>
         child: Stack(
           clipBehavior: Clip.none,
           children: [
-            // Card body
             Container(
               width: 110,
               height: 145,
@@ -552,7 +547,6 @@ class _LaraCardState extends State<_LaraCard>
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    // Doll sprite
                     Container(
                       color: LaraColors.cream,
                       padding: const EdgeInsets.all(10),
@@ -561,7 +555,6 @@ class _LaraCardState extends State<_LaraCard>
                         fit: BoxFit.contain,
                       ),
                     ),
-                    // Lock overlay (QR)
                     if (!unlocked)
                       Container(
                         color: LaraColors.ink.withValues(alpha: 0.65),
@@ -594,7 +587,7 @@ class _LaraCardState extends State<_LaraCard>
                 ),
               ),
             ),
-            // Doll number badge — top-left
+            // Number badge — top-left
             Positioned(
               top: -8,
               left: -8,
@@ -663,13 +656,16 @@ class _CharacterSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: accentColor, width: 3),
         boxShadow: [
-          BoxShadow(offset: const Offset(0, 5), blurRadius: 0, color: _darken(accentColor)),
+          BoxShadow(
+            offset: const Offset(0, 5),
+            blurRadius: 0,
+            color: _darken(accentColor),
+          ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Colored header strip
           Container(
             decoration: BoxDecoration(
               color: accentColor,
@@ -709,7 +705,6 @@ class _CharacterSection extends StatelessWidget {
               ],
             ),
           ),
-          // Card row with scroll-hint fade on the right
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 14, 0, 16),
             child: Stack(
@@ -829,8 +824,10 @@ class _CollectibleCardState extends State<_CollectibleCard>
         'assets/images/$_assetName.png',
         _detailLabel,
       );
-    } else {
+    } else if (CoinWallet.balance.value >= CollectiblesState.costs[widget.index]) {
       _showUnlockDialog();
+    } else {
+      showCoinShop(context);
     }
   }
 
@@ -912,12 +909,17 @@ class _CollectibleCardState extends State<_CollectibleCard>
 
   @override
   Widget build(BuildContext context) {
-    final unlocked = CollectiblesState.isUnlocked(widget.charKey, widget.index);
-    final cost = CollectiblesState.costs[widget.index];
     final gradColors = _borderGradients[widget.index];
     final level = widget.index + 1;
 
-    return GestureDetector(
+    return ValueListenableBuilder<int>(
+      valueListenable: CoinWallet.balance,
+      builder: (context, balance, _) {
+        final unlocked = CollectiblesState.isUnlocked(widget.charKey, widget.index);
+        final cost = CollectiblesState.costs[widget.index];
+        final canAfford = balance >= cost;
+
+        return GestureDetector(
       onTap: _onTap,
       child: AnimatedBuilder(
         animation: _bounceScale,
@@ -926,7 +928,6 @@ class _CollectibleCardState extends State<_CollectibleCard>
         child: Stack(
           clipBehavior: Clip.none,
           children: [
-            // Card body
             Container(
               width: 110,
               height: 145,
@@ -944,7 +945,6 @@ class _CollectibleCardState extends State<_CollectibleCard>
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    // Character sprite
                     Container(
                       color: LaraColors.cream,
                       padding: const EdgeInsets.all(10),
@@ -953,7 +953,6 @@ class _CollectibleCardState extends State<_CollectibleCard>
                         fit: BoxFit.contain,
                       ),
                     ),
-                    // Lock overlay
                     if (!unlocked)
                       Container(
                         color: LaraColors.ink.withValues(alpha: 0.65),
@@ -962,31 +961,33 @@ class _CollectibleCardState extends State<_CollectibleCard>
                           children: [
                             const Icon(Icons.lock_rounded,
                                 color: Colors.white, size: 34),
-                            const SizedBox(height: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: LaraColors.yellow,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.monetization_on_rounded,
-                                      color: LaraColors.galletaBrown, size: 14),
-                                  const SizedBox(width: 3),
-                                  Text(
-                                    '$cost',
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w900,
-                                      color: LaraColors.galletaBrown,
+                            if (canAfford) ...[
+                              const SizedBox(height: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: LaraColors.yellow,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.monetization_on_rounded,
+                                        color: LaraColors.galletaBrown, size: 14),
+                                    const SizedBox(width: 3),
+                                    Text(
+                                      '$cost',
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w900,
+                                        color: LaraColors.galletaBrown,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
+                            ],
                           ],
                         ),
                       ),
@@ -994,7 +995,6 @@ class _CollectibleCardState extends State<_CollectibleCard>
                 ),
               ),
             ),
-            // Level badge
             Positioned(
               top: -8,
               left: -8,
@@ -1029,6 +1029,8 @@ class _CollectibleCardState extends State<_CollectibleCard>
           ],
         ),
       ),
+    );
+      },
     );
   }
 }

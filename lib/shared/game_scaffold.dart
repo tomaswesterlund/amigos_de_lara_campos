@@ -26,6 +26,7 @@ class GameScaffold extends StatefulWidget {
     this.scoreLabel = 'Puntos',
     this.gameOverBuilder,
     this.coinReward,
+    this.additionalOverlays,
   });
 
   final String title;
@@ -40,6 +41,10 @@ class GameScaffold extends StatefulWidget {
   /// The function receives the finished game and returns the number of coins earned.
   final int Function(LaraGame game)? coinReward;
 
+  /// Extra overlay builders merged into [GameWidget.overlayBuilderMap].
+  /// Use this for game-specific overlays (e.g. difficulty-change confirmation).
+  final Map<String, Widget Function(BuildContext, LaraGame)>? additionalOverlays;
+
   @override
   State<GameScaffold> createState() => _GameScaffoldState();
 }
@@ -47,6 +52,12 @@ class GameScaffold extends StatefulWidget {
 class _GameScaffoldState extends State<GameScaffold> {
   late LaraGame _game = widget.builder();
   bool _coinPhaseComplete = false;
+
+  @override
+  void dispose() {
+    LaraAudio.stopBgm();
+    super.dispose();
+  }
 
   void _restart() {
     setState(() {
@@ -70,6 +81,7 @@ class _GameScaffoldState extends State<GameScaffold> {
                 label: widget.scoreLabel,
                 score: game.score,
               ),
+          ...?widget.additionalOverlays,
           'gameOver': (context, game) {
             // Phase A: show coin reward before game-over if configured.
             if (widget.coinReward != null && !_coinPhaseComplete) {

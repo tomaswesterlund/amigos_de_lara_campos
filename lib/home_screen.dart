@@ -24,6 +24,7 @@ import 'games/tap_the_heart/tap_heart_leaderboard_overlay.dart';
 import 'shared/coin_shop.dart';
 import 'shared/game_scaffold.dart';
 import 'shared/lara_audio.dart';
+import 'shared/lara_button.dart';
 import 'shared/lara_game.dart';
 import 'shared/lara_theme.dart';
 
@@ -67,12 +68,12 @@ class _HomeScreenState extends State<HomeScreen> {
   List<_GameTile> get _visibleTiles {
     final always = [
       _GameTile(
-        title: 'Rhenné Corre',
-        tagline: '¡Ayúdale a Rhenné llegar a Lara!',
+        title: 'Rhenné Nada',
+        tagline: '¡Ayúda a Rhenné a cruzar el estanque nadando hasta Lara!',
         spriteAsset: 'rhenne.png',
         color: LaraColors.rhenneGreenDark,
         builder: RhenneRunGame.new,
-        coinReward: (g) => 1 + (g.score > 200 ? 1 : 0) + (g.score > 500 ? 1 : 0),
+        coinReward: (g) => (g as RhenneRunGame).coinsCollected,
         gameOverBuilder: (context, game, restart, home) {
           final run = game as RhenneRunGame;
           return LeaderboardOverlay(
@@ -89,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
         spriteAsset: 'galleta.png',
         color: LaraColors.galletaBrown,
         builder: GalletaRunGame.new,
-        coinReward: (g) => 1 + (g.score > 300 ? 1 : 0),
+        coinReward: (g) => (g as GalletaRunGame).coinsCollected,
         gameOverBuilder: (context, game, restart, home) {
           final run = game as GalletaRunGame;
           return GalletaRunLeaderboardOverlay(
@@ -106,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
         spriteAsset: 'corazon.png',
         color: LaraColors.corazonRed,
         builder: TapHeartGame.new,
-        coinReward: (g) => 1,
+        coinReward: (g) => (g as TapHeartGame).coinsCollected,
         gameOverBuilder: (context, game, restart, home) {
           final tap = game as TapHeartGame;
           return TapHeartLeaderboardOverlay(
@@ -125,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
         unlockKey: 'memory_match',
         scoreLabel: 'Movimientos',
         builder: MemoryMatchGame.new,
-        coinReward: (g) => 2 + (g.score <= 12 ? 1 : 0),
+        coinReward: (g) => (g as MemoryMatchGame).coinsCollected,
         gameOverBuilder: (context, game, restart, home) {
           final mem = game as MemoryMatchGame;
           return MemoryMatchLeaderboardOverlay(
@@ -134,6 +135,15 @@ class _HomeScreenState extends State<HomeScreen> {
             onRestart: restart,
             onHome: home,
           );
+        },
+        additionalOverlays: {
+          'difficultyConfirm': (context, game) {
+            final g = game as MemoryMatchGame;
+            return _DifficultyConfirmOverlay(
+              onConfirm: g.confirmDifficulty,
+              onCancel: g.cancelDifficulty,
+            );
+          },
         },
       ),
     ];
@@ -205,8 +215,8 @@ class _HomeScreenState extends State<HomeScreen> {
               SliverToBoxAdapter(child: _Header(onTap: _onHeaderTap)),
               const SliverToBoxAdapter(child: _MatildaBanner()),
               const SliverToBoxAdapter(child: _AdBanner()),
-              const SliverToBoxAdapter(child: _CollectiblesBanner()),
               const SliverToBoxAdapter(child: _SectionDivider()),
+              const SliverToBoxAdapter(child: _CollectiblesBanner()),
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                 sliver: SliverList.separated(
@@ -268,6 +278,7 @@ class _GameTile {
     this.unlockKey,
     this.scoreLabel = 'Puntos',
     this.coinReward,
+    this.additionalOverlays,
   });
 
   final String title;
@@ -281,6 +292,8 @@ class _GameTile {
   final String scoreLabel;
   /// If set, coins are awarded via [CoinRewardOverlay] before the game-over card.
   final int Function(LaraGame)? coinReward;
+  /// Extra overlays passed directly to [GameScaffold.additionalOverlays].
+  final Map<String, Widget Function(BuildContext, LaraGame)>? additionalOverlays;
 }
 
 class _GameTileCard extends StatefulWidget {
@@ -316,6 +329,7 @@ class _GameTileCardState extends State<_GameTileCard> {
             gameOverBuilder: widget.tile.gameOverBuilder,
             scoreLabel: widget.tile.scoreLabel,
             coinReward: widget.tile.coinReward,
+            additionalOverlays: widget.tile.additionalOverlays,
           ),
         ),
       );
@@ -919,48 +933,63 @@ class _MuteButtonState extends State<_MuteButton> {
 
 // ─── Ad banner ────────────────────────────────────────────────────────────────
 
-class _AdBanner extends StatelessWidget {
+class _AdBanner extends StatefulWidget {
   const _AdBanner();
+
+  @override
+  State<_AdBanner> createState() => _AdBannerState();
+}
+
+class _AdBannerState extends State<_AdBanner> {
+  bool _pressed = false;
+  static const _depth = 5.0;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) {
+        setState(() => _pressed = false);
         Navigator.of(context).push(
           MaterialPageRoute<void>(builder: (_) => const ConcertScreen()),
         );
       },
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          gradient: LaraGradients.sunny,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: LaraColors.yellow, width: 3),
-          boxShadow: const [
-            BoxShadow(
-              offset: Offset(0, 4),
-              blurRadius: 0,
-              color: LaraColors.galletaBrown,
-            ),
-          ],
-        ),
-        child: const Row(
-          children: [
-            Text('🎤', style: TextStyle(fontSize: 26)),
-            SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                '¡Lara Campos cantará en Pachuca este fin de semana!',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white,
+      onTapCancel: () => setState(() => _pressed = false),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 70),
+          curve: Curves.easeOut,
+          transform: Matrix4.translationValues(0, _pressed ? _depth : 0, 0),
+          decoration: BoxDecoration(
+            color: LaraColors.magenta,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                offset: Offset(0, _pressed ? 0 : _depth),
+                blurRadius: 0,
+                color: _darken(LaraColors.magenta),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: const Row(
+            children: [
+              Text('🎤', style: TextStyle(fontSize: 26)),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  '¡Lara Campos cantará en Pachuca este fin de semana!',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
                 ),
               ),
-            ),
-            Icon(Icons.chevron_right_rounded, color: Colors.white, size: 26),
-          ],
+              Icon(Icons.chevron_right_rounded, color: Colors.white, size: 26),
+            ],
+          ),
         ),
       ),
     );
@@ -969,50 +998,63 @@ class _AdBanner extends StatelessWidget {
 
 // ─── Matilda banner ───────────────────────────────────────────────────────────
 
-class _MatildaBanner extends StatelessWidget {
+class _MatildaBanner extends StatefulWidget {
   const _MatildaBanner();
+
+  @override
+  State<_MatildaBanner> createState() => _MatildaBannerState();
+}
+
+class _MatildaBannerState extends State<_MatildaBanner> {
+  bool _pressed = false;
+  static const _depth = 5.0;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) {
+        setState(() => _pressed = false);
         Navigator.of(context).push(
           MaterialPageRoute<void>(builder: (_) => const MatildaScreen()),
         );
       },
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF6A0DAD), Color(0xFF9B59B6)],
+      onTapCancel: () => setState(() => _pressed = false),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 70),
+          curve: Curves.easeOut,
+          transform: Matrix4.translationValues(0, _pressed ? _depth : 0, 0),
+          decoration: BoxDecoration(
+            color: const Color(0xFF6A0DAD),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                offset: Offset(0, _pressed ? 0 : _depth),
+                blurRadius: 0,
+                color: const Color(0xFF4A0080),
+              ),
+            ],
           ),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0xFFD4A0FF), width: 3),
-          boxShadow: const [
-            BoxShadow(
-              offset: Offset(0, 4),
-              blurRadius: 0,
-              color: Color(0xFF4A0080),
-            ),
-          ],
-        ),
-        child: const Row(
-          children: [
-            Text('🎭', style: TextStyle(fontSize: 26)),
-            SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                '¡Matilda El Musical llega a México!',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: const Row(
+            children: [
+              Text('🎭', style: TextStyle(fontSize: 26)),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  '¡Matilda El Musical llega a México!',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
                 ),
               ),
-            ),
-            Icon(Icons.chevron_right_rounded, color: Colors.white, size: 26),
-          ],
+              Icon(Icons.chevron_right_rounded, color: Colors.white, size: 26),
+            ],
+          ),
         ),
       ),
     );
@@ -1026,36 +1068,9 @@ class _SectionDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 14, 20, 6),
-      child: Row(
-        children: [
-          const Expanded(
-            child: Divider(color: Colors.white54, thickness: 1.5),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-              decoration: BoxDecoration(
-                color: LaraColors.cream,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Text(
-                '🎮 Mini-juegos',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                  color: LaraColors.magenta,
-                ),
-              ),
-            ),
-          ),
-          const Expanded(
-            child: Divider(color: Colors.white54, thickness: 1.5),
-          ),
-        ],
-      ),
+    return const Padding(
+      padding: EdgeInsets.fromLTRB(20, 14, 20, 6),
+      child: Divider(color: Colors.white54, thickness: 1.5),
     );
   }
 }
@@ -1113,8 +1128,10 @@ class _CollectiblesBannerState extends State<_CollectiblesBanner> {
                   color: Colors.white.withValues(alpha: 0.28),
                   borderRadius: BorderRadius.circular(18),
                 ),
-                child: const Center(
-                  child: Text('⭐', style: TextStyle(fontSize: 40)),
+                padding: const EdgeInsets.all(6),
+                child: Image.asset(
+                  'assets/images/collectibles_icon.png',
+                  fit: BoxFit.contain,
                 ),
               ),
               const SizedBox(width: 14),
@@ -1126,7 +1143,7 @@ class _CollectiblesBannerState extends State<_CollectiblesBanner> {
                     Text('Coleccionables', style: LaraTextStyles.titleCard),
                     SizedBox(height: 4),
                     Text(
-                      'Desbloquea figuras de Rhenné, Galleta y Corazón',
+                      '¡Desbloquea los amigos de Lara y aparecerán en los juegos!',
                       style: LaraTextStyles.tagline,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -1139,6 +1156,80 @@ class _CollectiblesBannerState extends State<_CollectiblesBanner> {
                 Icons.chevron_right_rounded,
                 color: Colors.white,
                 size: 32,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Difficulty-change confirmation overlay (Memoria Amigos) ──────────────────
+
+class _DifficultyConfirmOverlay extends StatelessWidget {
+  const _DifficultyConfirmOverlay({
+    required this.onConfirm,
+    required this.onCancel,
+  });
+
+  final VoidCallback onConfirm;
+  final VoidCallback onCancel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 320),
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.fromLTRB(24, 22, 24, 24),
+          decoration: BoxDecoration(
+            color: LaraColors.cream,
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(color: LaraColors.magenta, width: 4),
+            boxShadow: const [
+              BoxShadow(offset: Offset(0, 6), blurRadius: 0, color: LaraColors.magenta),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                '¿Cambiar nivel?',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                  color: LaraColors.magenta,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Perderás el progreso del juego actual.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: LaraColors.ink,
+                ),
+              ),
+              const SizedBox(height: 20),
+              LaraButton(
+                label: 'Sí, cambiar',
+                icon: Icons.check_rounded,
+                onPressed: onConfirm,
+                fullWidth: true,
+              ),
+              const SizedBox(height: 12),
+              LaraButton(
+                label: 'Cancelar',
+                color: LaraColors.mint,
+                shadowColor: LaraColors.rhenneGreenDark,
+                icon: Icons.close_rounded,
+                onPressed: onCancel,
+                fullWidth: true,
               ),
             ],
           ),

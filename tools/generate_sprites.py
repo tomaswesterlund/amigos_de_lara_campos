@@ -411,6 +411,21 @@ def corazon_l5():
     return img
 
 
+def draw_collectibles_icon():
+    """Combined icon: Rhenné (left), Galleta (right), Corazón heart (front-centre)."""
+    img = new_canvas()
+    frog = draw_frog(crown=False, body_color=RHENNE_GREEN, body_dark=RHENNE_GREEN_DARK)
+    frog = frog.resize((136, 136), Image.LANCZOS)
+    img.paste(frog, (0, 16), frog)
+    dog = draw_dog_white()
+    dog = dog.resize((136, 136), Image.LANCZOS)
+    img.paste(dog, (120, 16), dog)
+    heart = draw_heart()
+    heart = heart.resize((96, 96), Image.LANCZOS)
+    img.paste(heart, (80, 160), heart)
+    return img
+
+
 def bird_enemy() -> Image.Image:
     """Vivid red+yellow diving bird with beak pointing downward (toward the player)."""
     W = 78
@@ -476,6 +491,57 @@ def draw_water_rock() -> Image.Image:
     return img
 
 
+def draw_coin() -> Image.Image:
+    """78×78 yellow coin pickup with gold border and shine highlight."""
+    import math
+    W = 78
+    img = Image.new("RGBA", (W, W), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    cx, cy, r = W // 2, W // 2, 30
+    d.ellipse([cx-r, cy-r, cx+r, cy+r], fill=YELLOW, outline=GOLD, width=3)
+    d.ellipse([cx-r+6, cy-r+6, cx+r-6, cy+r-6], outline=GOLD, width=2)
+    d.arc([cx-r+4, cy-r+4, cx-2, cy-2], start=200, end=320, fill=WHITE, width=4)
+    star_pts = []
+    for i in range(8):
+        angle = i * 45 - 90
+        radius = 7 if i % 2 == 0 else 3
+        star_pts.append((cx + radius * math.cos(math.radians(angle)),
+                         cy + radius * math.sin(math.radians(angle))))
+    d.polygon(star_pts, fill=WHITE)
+    return img
+
+
+def draw_reed() -> Image.Image:
+    """Water cattail / totora for Rhenné Corre pond decoration."""
+    img = new_canvas()
+    d = ImageDraw.Draw(img)
+    # Brown vertical stem
+    d.rectangle([118, 95, 138, 250], fill=GALLETA_BROWN, outline=GALLETA_BROWN_DARK, width=2)
+    # Dark cattail head (oval)
+    d.ellipse([100, 28, 156, 120], fill=(72, 46, 18, 255), outline=(50, 30, 10, 255), width=3)
+    d.ellipse([108, 22, 148, 52], fill=(56, 34, 12, 255))
+    # Thin green leaves
+    d.rectangle([84, 150, 98, 230], fill=LILY_DARK)
+    d.rectangle([158, 160, 172, 235], fill=LILY_DARK)
+    return img
+
+
+def draw_water_flower() -> Image.Image:
+    """Lotus-style water flower for Rhenné Corre pond decoration."""
+    import math
+    img = new_canvas()
+    d = ImageDraw.Draw(img)
+    cx, cy = 128, 150
+    for i in range(8):
+        angle = math.radians(i * 45)
+        px = cx + int(46 * math.cos(angle))
+        py = cy + int(46 * math.sin(angle))
+        d.ellipse([px - 24, py - 24, px + 24, py + 24], fill=PINK, outline=MAGENTA, width=2)
+    d.ellipse([72, 108, 184, 192], fill=LILY, outline=LILY_DARK, width=3)
+    d.ellipse([108, 130, 148, 170], fill=YELLOW, outline=GOLD, width=2)
+    return img
+
+
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 def main():
@@ -517,6 +583,10 @@ def main():
         "lara_d1.png": lara_d1(),
         "lara_d2.png": lara_d2(),
         "lara_d3.png": lara_d3(),
+        "collectibles_icon.png": draw_collectibles_icon(),
+        "coin_pickup.png": draw_coin(),
+        "reed.png": draw_reed(),
+        "water_flower.png": draw_water_flower(),
     }
     for name, im in artworks.items():
         path = OUT / name

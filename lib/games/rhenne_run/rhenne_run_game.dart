@@ -8,10 +8,12 @@ import '../../shared/lara_audio.dart';
 import '../../shared/lara_game.dart';
 import '../../shared/lara_theme.dart';
 import 'components/cloud.dart';
+import 'components/coin_pop.dart';
 import 'components/lane_item.dart';
 import 'components/runner_rhenne.dart';
 import 'components/score_pop.dart';
 import 'components/side_decor.dart';
+import 'components/tutorial_hint.dart';
 import 'leaderboard.dart';
 
 /// 3-lane infinite runner starring Rhenné. Tap left/right (or swipe) to
@@ -21,20 +23,26 @@ class RhenneRunGame extends LaraGame
   RhenneRunGame() : super(gradient: LaraGradients.pond, bgm: LaraBgm.rhenne);
 
   static const _laneCount = 3;
-  static const _baseScroll = 280.0;
-  static const _maxScroll = 600.0;
-  static const _baseSpawn = 0.85;
+  static const _debugLayout = false;
+  static const _baseScroll = 160.0;
+  static const _maxScroll = 380.0;
+  static const _baseSpawn = 1.2;
 
   RunnerRhenne? _rhenne;
   Sprite? _heartSprite;
   Sprite? _goldenHeartSprite;
   Sprite? _pinkHeartSprite;
   Sprite? _rockSprite;
-  Sprite? _birdSprite;
+  Sprite? _coinSprite;
   Sprite? _lilypadSprite;
+  Sprite? _reedSprite;
+  Sprite? _waterFlowerSprite;
   int _lane = 1;
   int _score = 0;
+  int _coinsCollected = 0;
   bool _running = true;
+
+  int get coinsCollected => _coinsCollected;
 
   /// Leaderboard entry created by the most recent crash. Read by the
   /// leaderboard overlay to highlight Lupita's just-played run.
@@ -48,7 +56,7 @@ class RhenneRunGame extends LaraGame
   double get _laneWidth => size.x / _laneCount;
   double get _playerY => size.y * 0.78;
   double get scrollSpeed =>
-      (_baseScroll + _score * 5).clamp(_baseScroll, _maxScroll);
+      (_baseScroll + _score * 2).clamp(_baseScroll, _maxScroll);
 
   double laneCenterX(int lane) => _laneWidth * (lane + 0.5);
 
@@ -58,14 +66,19 @@ class RhenneRunGame extends LaraGame
     _heartSprite = await loadSprite('corazon.png');
     _goldenHeartSprite = await loadSprite('corazon_yellow.png');
     _pinkHeartSprite = await loadSprite('corazon_pink.png');
-    _rockSprite = await loadSprite('obstacle_water_rock.png');
-    _birdSprite = await loadSprite('bird_enemy.png');
+    _rockSprite = await loadSprite('obstacle_rock.png');
+    _coinSprite = await loadSprite('coin_pickup.png');
     _lilypadSprite = await loadSprite('lilypad.png');
+    _reedSprite = await loadSprite('reed.png');
+    _waterFlowerSprite = await loadSprite('water_flower.png');
     final r = RunnerRhenne(await loadSprite('rhenne.png'), laneWidth: _laneWidth);
     _rhenne = r;
+    add(_PondFloor());
     add(_LaneStripes());
     add(r);
     _placeRhenne();
+    if (_debugLayout) add(_DebugLanes());
+    if (!TutorialHint.shown) add(TutorialHint());
     // Seed a couple of clouds so the sky isn't empty at start.
     for (var i = 0; i < 3; i++) {
       _spawnCloud(initial: true);
@@ -93,7 +106,7 @@ class RhenneRunGame extends LaraGame
     _cloudTimer += dt;
     _decorTimer += dt;
 
-    final spawnInterval = (_baseSpawn - _score * 0.005).clamp(0.4, _baseSpawn);
+    final spawnInterval = (_baseSpawn - _score * 0.005).clamp(0.55, _baseSpawn);
     if (_spawnTimer >= spawnInterval) {
       _spawnTimer = 0;
       _spawn();
@@ -113,8 +126,8 @@ class RhenneRunGame extends LaraGame
     final golden = _goldenHeartSprite;
     final pink = _pinkHeartSprite;
     final rock = _rockSprite;
-    final bird = _birdSprite;
-    if (heart == null || golden == null || pink == null || rock == null || bird == null) return;
+    final coin = _coinSprite;
+    if (heart == null || golden == null || pink == null || rock == null || coin == null) return;
 
     // Pick 1–2 lanes to fill this wave so the player always has a safe lane.
     final lanesShuffled = List.generate(_laneCount, (i) => i)..shuffle(_rng);
@@ -122,24 +135,17 @@ class RhenneRunGame extends LaraGame
     for (var i = 0; i < fillCount; i++) {
       final lane = lanesShuffled[i];
       final roll = _rng.nextDouble();
-      // 6% golden | 20% pink | 32% red | 22% rock | 20% bird
       final LaneItemKind kind;
-      final Sprite sprite;
-      if (roll < 0.06) {
-        kind = LaneItemKind.goldenHeart;
-        sprite = golden;
-      } else if (roll < 0.26) {
-        kind = LaneItemKind.pinkHeart;
-        sprite = pink;
-      } else if (roll < 0.58) {
-        kind = LaneItemKind.heart;
-        sprite = heart;
-      } else if (roll < 0.80) {
-        kind = LaneItemKind.rock;
-        sprite = rock;
+      final Sprite? sprite;
+      if (roll < 0.07) {
+        kind = LaneItemKind.coin; sprite = coin;
       } else {
-        kind = LaneItemKind.bird;
-        sprite = bird;
+        final r2 = _rng.nextDouble();
+        if      (r2 < 0.06) { kind = LaneItemKind.goldenHeart; sprite = golden; }
+        else if (r2 < 0.26) { kind = LaneItemKind.pinkHeart;   sprite = pink;   }
+        else if (r2 < 0.58) { kind = LaneItemKind.heart;        sprite = heart;  }
+        else if (r2 < 0.80) { kind = LaneItemKind.rock;         sprite = rock;   }
+        else                 { kind = LaneItemKind.fish;         sprite = null;   }
       }
       add(
         LaneItem(sprite: sprite, kind: kind, lane: lane)
@@ -166,18 +172,33 @@ class RhenneRunGame extends LaraGame
   }
 
   void _spawnSideDecor() {
-    final sprite = _lilypadSprite;
-    if (sprite == null) return;
-    final fromLeft = _rng.nextBool();
-    final w = 60.0 + _rng.nextDouble() * 30.0;
-    final pad = SideLilyPad(sprite: sprite, speedFactor: 0.7)
-      ..size = Vector2(w, w * 0.55)
-      ..priority = -700
-      ..position = Vector2(
-        fromLeft ? -10 + _rng.nextDouble() * 18 : size.x + 10 - _rng.nextDouble() * 18,
-        -40,
-      );
-    add(pad);
+    final speedFactor = 0.6 + _rng.nextDouble() * 0.15;
+    final x = 20 + _rng.nextDouble() * (size.x - 40);
+    final roll = _rng.nextInt(3);
+
+    if (roll == 0) {
+      final sprite = _lilypadSprite;
+      if (sprite == null) return;
+      final w = 60.0 + _rng.nextDouble() * 30.0;
+      add(SideLilyPad(sprite: sprite, speedFactor: speedFactor)
+        ..size = Vector2(w, w * 0.55)
+        ..priority = -900
+        ..position = Vector2(x, -40));
+    } else if (roll == 1) {
+      final sprite = _reedSprite;
+      if (sprite == null) return;
+      add(SideReed(sprite: sprite, speedFactor: speedFactor)
+        ..size = Vector2(30, 100)
+        ..priority = -900
+        ..position = Vector2(x, -40));
+    } else {
+      final sprite = _waterFlowerSprite;
+      if (sprite == null) return;
+      add(SideWaterFlower(sprite: sprite, speedFactor: speedFactor)
+        ..size = Vector2(70, 70)
+        ..priority = -900
+        ..position = Vector2(x, -40));
+    }
   }
 
   void _switchLane(int delta) {
@@ -228,6 +249,15 @@ class RhenneRunGame extends LaraGame
     setScore(_score);
   }
 
+  void onCoinPicked(LaneItem item) {
+    if (!_running) return;
+    final pos = item.position.clone();
+    item.removeFromParent();
+    _coinsCollected++;
+    add(CoinPop(startPosition: pos));
+    LaraAudio.playSfx(LaraSfx.coin);
+  }
+
   Future<void> onCrash() async {
     if (!_running) return;
     LaraAudio.playSfx(LaraSfx.miss);
@@ -238,6 +268,99 @@ class RhenneRunGame extends LaraGame
     }
     lastEntry = RhenneRunLeaderboard.submit(_score);
     showGameOver('¡Rhenné chocó!', () {});
+  }
+}
+
+/// Animated water floor that fills the area below the player to the bottom edge.
+class _PondFloor extends PositionComponent with HasGameReference<RhenneRunGame> {
+  static const _ratio = 0.83;
+  double _waveOffset = 0;
+
+  void _refit(Vector2 s) {
+    position = Vector2(0, s.y * _ratio);
+    size = Vector2(s.x, s.y * (1 - _ratio));
+  }
+
+  @override
+  void onMount() {
+    super.onMount();
+    priority = -5;
+    _refit(game.size);
+  }
+
+  @override
+  void onGameResize(Vector2 newSize) {
+    super.onGameResize(newSize);
+    _refit(newSize);
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    _waveOffset += 55.0 * dt;
+  }
+
+  @override
+  void render(Canvas canvas) {
+    // Deep water body — lighter so it doesn't dominate the playfield
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.x, size.y),
+      Paint()..color = const Color(0xFF1A5276).withValues(alpha: 0.55),
+    );
+    // Scrolling horizontal wave bands — softer contrast
+    final wavePaint = Paint()
+      ..color = const Color(0xFF2980B9).withValues(alpha: 0.25);
+    final wrap = _waveOffset % 30;
+    for (var y = -wrap; y < size.y; y += 30) {
+      canvas.drawRect(Rect.fromLTWH(0, y, size.x, 10), wavePaint);
+    }
+    // Water-surface shimmer line — toned down
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.x, 5),
+      Paint()..color = const Color(0xFF5DDEF4).withValues(alpha: 0.5),
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.x, 2),
+      Paint()..color = const Color(0xFF85E4F0).withValues(alpha: 0.4),
+    );
+  }
+}
+
+/// Debug overlay: lane boundaries, lane centres, and player-Y line.
+/// Only added when [RhenneRunGame._debugLayout] is true (i.e. debug builds).
+class _DebugLanes extends PositionComponent with HasGameReference<RhenneRunGame> {
+  @override
+  void onMount() {
+    super.onMount();
+    priority = 9999;
+    size = game.size;
+  }
+
+  @override
+  void onGameResize(Vector2 s) {
+    super.onGameResize(s);
+    size = s;
+  }
+
+  @override
+  void render(Canvas canvas) {
+    final lw = game.size.x / 3;
+    final bound = Paint()
+      ..color = const Color(0x66FF0000)
+      ..strokeWidth = 2;
+    for (var i = 0; i <= 3; i++) {
+      canvas.drawLine(Offset(lw * i, 0), Offset(lw * i, game.size.y), bound);
+    }
+    final centre = Paint()
+      ..color = const Color(0x88FFFF00)
+      ..strokeWidth = 1;
+    for (var i = 0; i < 3; i++) {
+      canvas.drawLine(Offset(lw * (i + 0.5), 0), Offset(lw * (i + 0.5), game.size.y), centre);
+    }
+    final yLine = Paint()
+      ..color = const Color(0x8800FF00)
+      ..strokeWidth = 2;
+    canvas.drawLine(Offset(0, game.size.y * 0.78), Offset(game.size.x, game.size.y * 0.78), yLine);
   }
 }
 

@@ -7,7 +7,7 @@ void main() {
   setUp(DailyBonusDialog.suppressForTest);
 
   testWidgets('App boots and shows the home greeting', (tester) async {
-    await tester.pumpWidget(const LaraDemoApp());
+    await tester.pumpWidget(const AmigosDeLaraApp());
     await tester.pump();
     expect(find.text('¡Hola Amiguitos!'), findsOneWidget);
   });
