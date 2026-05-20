@@ -43,6 +43,12 @@ class LaraGradients {
       Color(0xFF2A1468),
     ],
   );
+
+  static const underwater = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFF0B4D7A), Color(0xFF0A7AC4), Color(0xFF23B5A0)],
+  );
 }
 
 class LaraTextStyles {

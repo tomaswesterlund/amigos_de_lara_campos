@@ -16,8 +16,8 @@ import 'games/memory_match/memory_match_game.dart';
 import 'games/memory_match/memory_match_leaderboard_overlay.dart';
 import 'games/rhenne_fly/rhenne_fly_game.dart';
 import 'games/rhenne_jump/rhenne_jump_game.dart';
-import 'games/rhenne_run/leaderboard_overlay.dart';
-import 'games/rhenne_run/rhenne_run_game.dart';
+import 'games/rhenne_nada/rhenne_nada_game.dart';
+import 'games/rhenne_brinca/rhenne_brinca_game.dart';
 import 'games/rhythm_tap/rhythm_tap_game.dart';
 import 'games/tap_the_heart/tap_heart_game.dart';
 import 'games/tap_the_heart/tap_heart_leaderboard_overlay.dart';
@@ -70,19 +70,18 @@ class _HomeScreenState extends State<HomeScreen> {
       _GameTile(
         title: 'Rhenné Nada',
         tagline: '¡Ayúda a Rhenné a cruzar el estanque nadando hasta Lara!',
-        spriteAsset: 'rhenne.png',
-        color: LaraColors.rhenneGreenDark,
-        builder: RhenneRunGame.new,
-        coinReward: (g) => (g as RhenneRunGame).coinsCollected,
-        gameOverBuilder: (context, game, restart, home) {
-          final run = game as RhenneRunGame;
-          return LeaderboardOverlay(
-            finalScore: run.score,
-            justPlayed: run.lastEntry,
-            onRestart: restart,
-            onHome: home,
-          );
-        },
+        spriteAsset: 'rhenne_swim_1.png',
+        color: const Color(0xFF0B4D7A),
+        builder: RhenneNadaGame.new,
+        coinReward: (g) => (g as RhenneNadaGame).coinsCollected,
+      ),
+      _GameTile(
+        title: 'Rhenné Brinca',
+        tagline: '¡Rhenné brinca entre lirios — esquiva la lluvia y atrapa luciérnagas!',
+        spriteAsset: 'rhenne_swim_1.png',
+        color: LaraColors.rhenneGreen,
+        builder: RhenneBrincaGame.new,
+        coinReward: (g) => (g as RhenneBrincaGame).coinsCollected,
       ),
       _GameTile(
         title: 'Galleta Corre',

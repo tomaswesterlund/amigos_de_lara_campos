@@ -471,22 +471,108 @@ def bird_enemy() -> Image.Image:
     return img
 
 
-def draw_water_rock() -> Image.Image:
-    """Rounded blue-grey wet stone for water-based levels (Rhenné Corre)."""
+def _algae_frond(d, base_x, base_y, sway):
+    """Leaf-shaped 6-point polygon anchored at base, tip bends sway px horizontally."""
+    ALGAE = ( 52, 152, 110, 220)
+    ALDAR = ( 30, 102,  74, 220)
+    tip_x = base_x + sway
+    tip_y = base_y - 12
+    pts = [
+        (base_x,      base_y),
+        (base_x - 5,  base_y - 4),
+        (tip_x  - 3,  tip_y  + 3),
+        (tip_x,       tip_y),
+        (tip_x  + 3,  tip_y  + 3),
+        (base_x + 5,  base_y - 4),
+    ]
+    d.polygon(pts, fill=ALGAE, outline=ALDAR, width=1)
+
+
+def draw_water_rock(frame: int) -> Image.Image:
+    """
+    Irregular wet stone obstacle for Rhenné Nada. 78×78, 4-frame sprite sheet.
+    UnderwaterRock combines this animation (stepTime=0.4s, 1.6s cycle) with a
+    Flame ScaleEffect.by(1.02) breathing pulse at runtime.
+
+    All 4 frames share identical rock body, lighting facets, barnacles, cracks,
+    outline and specular. Per-frame differences:
+      — Algae fronds sway: F1=+5px right, F2=neutral, F3=-5px left, F4=+2px
+      — Rising bubble from main crack: F1=low, F2=mid, F3=high, F4=none
+    """
     W = 78
     img = Image.new("RGBA", (W, W), (0, 0, 0, 0))
-    d = ImageDraw.Draw(img)
+    d   = ImageDraw.Draw(img)
 
-    BODY   = (110, 130, 160, 255)  # blue-grey
-    BORDER = (70, 90, 115, 255)    # darker border
-    MID    = (140, 160, 185, 255)  # lighter mid-tone for volume
+    MID   = ( 88,  98, 120, 255)   # slate blue-grey base
+    DARK  = ( 52,  60,  78, 255)   # deep shadow / outline
+    SHAD  = ( 60,  68,  88, 255)   # shadow facet (lower-right)
+    LITE  = (118, 136, 168, 255)   # highlight facet (upper-left)
+    ALGAE = ( 52, 152, 110, 220)   # teal algae
+    ALDAR = ( 30, 102,  74, 220)   # algae dark edge
+    BARN  = (158, 154, 142, 255)   # barnacle cream
+    BDRK  = (108, 103,  92, 255)   # barnacle dark
+    CRACK = ( 40,  46,  62, 195)   # crack line
+    SHEEN = (215, 232, 255, 240)   # wet specular
 
-    # Main rounded body
-    d.ellipse([8, 16, 70, 66], fill=BODY, outline=BORDER, width=3)
-    # Mid-tone area for 3D depth
-    d.ellipse([18, 24, 58, 56], fill=MID)
-    # White wet-sheen highlight at top-left
-    d.arc([14, 20, 36, 38], start=200, end=320, fill=(240, 245, 255, 200), width=4)
+    # ── 1. ROCK BODY — lumpy 11-point polygon ─────────────────────────────────
+    rock = [
+        (20, 14),   # top-left
+        (36,  8),   # top peak
+        (52, 12),   # top-right
+        (66, 24),   # right upper
+        (70, 40),   # right max
+        (64, 56),   # right lower
+        (48, 64),   # bottom-right
+        (28, 62),   # bottom center
+        (12, 52),   # left lower
+        ( 8, 34),   # left max
+        (12, 20),   # left upper
+    ]
+    d.polygon(rock, fill=MID)
+
+    # ── 2. SHADOW FACET — lower-right third (light from upper-left) ───────────
+    d.polygon([
+        (38, 36),
+        (66, 24), (70, 40), (64, 56), (48, 64), (28, 62), (12, 52),
+        (20, 44),
+    ], fill=SHAD)
+
+    # ── 3. HIGHLIGHT FACET — upper-left third ─────────────────────────────────
+    d.polygon([
+        (38, 36), (20, 44), (12, 20),
+        (20, 14), (36,  8), (52, 12), (60, 26), (46, 30),
+    ], fill=LITE)
+
+    # ── 4. ALGAE FRONDS — leaf polygons sway per frame ───────────────────────
+    sway = {1: +5, 2: 0, 3: -5, 4: +2}[frame]
+    for bx, by in [(22, 64), (38, 65), (54, 62)]:
+        _algae_frond(d, bx, by, sway)
+
+    # ── 5. BARNACLE CLUSTERS on the lit upper face ────────────────────────────
+    for bx, by in [(30, 24), (42, 18), (54, 24), (38, 32), (50, 32), (26, 34)]:
+        d.ellipse([bx-4, by-3, bx+4, by+3], fill=BARN, outline=BDRK, width=1)
+        d.ellipse([bx-1, by-1, bx+1, by+1], fill=BDRK)   # central pore
+
+    # ── 6. SURFACE CRACKS (Y-shaped + second fracture) ────────────────────────
+    d.line([(30, 28), (46, 46)], fill=CRACK, width=2)   # main crack
+    d.line([(46, 46), (58, 40)], fill=CRACK, width=1)   # branch right
+    d.line([(46, 46), (44, 56)], fill=CRACK, width=1)   # branch down
+    d.line([(52, 22), (62, 38)], fill=CRACK, width=2)   # second crack
+
+    # ── 7. ROCK OUTLINE — drawn last to sharpen the silhouette ────────────────
+    d.polygon(rock, fill=None, outline=DARK, width=3)
+
+    # ── 7b. RISING BUBBLE — from main crack, present in frames 1-3 ───────────
+    bubble_pos = {1: (43, 44), 2: (41, 38), 3: (39, 31), 4: None}[frame]
+    if bubble_pos is not None:
+        bx, by = bubble_pos
+        BUBBLE = (210, 240, 255, 200)
+        d.ellipse([bx-2, by-2, bx+2, by+2], fill=BUBBLE, outline=SHEEN, width=1)
+
+    # ── 8. WET SPECULAR HIGHLIGHT ─────────────────────────────────────────────
+    # Arc 195°→330° clockwise traces upper portion of oval = top-left glance.
+    d.arc([10, 12, 38, 32], start=195, end=330, fill=SHEEN, width=5)
+    d.arc([14, 16, 28, 26], start=210, end=320, fill=WHITE, width=3)   # hot spot
 
     return img
 
@@ -542,6 +628,327 @@ def draw_water_flower() -> Image.Image:
     return img
 
 
+# ── Rhenné Nada swimming sprites ─────────────────────────────────────────────
+
+FISH_ORANGE = (255, 140, 0, 255)
+FISH_YELLOW = (255, 210, 60, 255)
+FISH_STRIPE = (30, 30, 30, 200)
+JELLY_PINK  = (255, 130, 200, 160)
+JELLY_DARK  = (220, 80, 160, 220)
+JELLY_TENT  = (200, 100, 170, 180)
+_LIMB_OUTLINE = (40, 100, 30, 255)
+
+
+def _webbed_appendage(d, cx, cy, ray, spread_deg, num_toes, dir_deg, color, outline):
+    """Fan-shaped webbed hand or foot pointing in dir_deg direction."""
+    import math
+    dir_rad = math.radians(dir_deg)
+    half    = math.radians(spread_deg / 2)
+    step    = math.radians(spread_deg) / max(1, num_toes - 1)
+    pts = [(cx, cy)]
+    for i in range(num_toes):
+        a = dir_rad - half + step * i
+        pts.append((cx + ray * math.cos(a), cy + ray * math.sin(a)))
+    pts.append((cx, cy))
+    d.polygon(pts, fill=color, outline=outline)
+
+
+def _limb(d, x0, y0, x1, y1, thickness, color, outline):
+    """Tapered trapezoid limb (wide root → thin tip) + joint circle at root."""
+    import math
+    dx, dy = x1 - x0, y1 - y0
+    length = math.hypot(dx, dy)
+    if length < 1:
+        return
+    nx, ny = -dy / length, dx / length
+    hw0, hw1 = thickness * 0.55, thickness * 0.25
+    pts = [
+        (x0 + nx * hw0, y0 + ny * hw0),
+        (x1 + nx * hw1, y1 + ny * hw1),
+        (x1 - nx * hw1, y1 - ny * hw1),
+        (x0 - nx * hw0, y0 - ny * hw0),
+    ]
+    d.polygon(pts, fill=color, outline=outline)
+    d.ellipse([x0 - hw0, y0 - hw0, x0 + hw0, y0 + hw0], fill=color, outline=outline)
+
+
+def draw_rhenne_swim(frame: int) -> Image.Image:
+    """
+    4-frame breaststroke cycle.
+    Layer order: hind legs → fore arms → body → belly highlight → eye bumps → face.
+    This puts joint roots behind the body so limbs look naturally attached.
+    """
+    import math
+
+    BODY  = RHENNE_GREEN
+    DARK  = RHENNE_GREEN_DARK
+    BELLY = (148, 220, 128, 200)   # lighter tint for volume
+
+    img = new_canvas()
+    d   = ImageDraw.Draw(img)
+
+    # Shoulder and hip roots (at the edges of the body ellipses)
+    SHL = (42,  132)   # left shoulder
+    SHR = (214, 132)   # right shoulder
+    HIL = (72,  218)   # left hip
+    HIR = (184, 218)   # right hip
+
+    # Per-frame limb tip positions — 4-phase breaststroke
+    poses = {
+        1: dict(larm=(8,  108), rarm=(248, 108), lleg=(72,  255), rleg=(184, 255)),  # Glide
+        2: dict(larm=(5,  155), rarm=(251, 155), lleg=(28,  248), rleg=(228, 248)),  # Pull
+        3: dict(larm=(25, 180), rarm=(231, 180), lleg=(8,   226), rleg=(248, 226)),  # Kick
+        4: dict(larm=(10, 120), rarm=(246, 120), lleg=(55,  255), rleg=(201, 255)),  # Snap
+    }
+    p = poses[frame]
+
+    def _dir(root, tip):
+        return math.degrees(math.atan2(tip[1] - root[1], tip[0] - root[0]))
+
+    # ── 1. HIND LEGS — drawn first (behind body) ─────────────────────────────
+    _limb(d, *SHL, *p['larm'], 24, DARK, _LIMB_OUTLINE)
+    _limb(d, *SHR, *p['rarm'], 24, DARK, _LIMB_OUTLINE)
+    _webbed_appendage(d, *p['larm'], ray=22, spread_deg=55, num_toes=3,
+                      dir_deg=_dir(SHL, p['larm']), color=DARK, outline=_LIMB_OUTLINE)
+    _webbed_appendage(d, *p['rarm'], ray=22, spread_deg=55, num_toes=3,
+                      dir_deg=_dir(SHR, p['rarm']), color=DARK, outline=_LIMB_OUTLINE)
+
+    # ── 2. FORE ARMS — drawn before body (joint roots covered by body) ────────
+    _limb(d, *HIL, *p['lleg'], 30, DARK, _LIMB_OUTLINE)
+    _limb(d, *HIR, *p['rleg'], 30, DARK, _LIMB_OUTLINE)
+    _webbed_appendage(d, *p['lleg'], ray=28, spread_deg=70, num_toes=4,
+                      dir_deg=_dir(HIL, p['lleg']), color=DARK, outline=_LIMB_OUTLINE)
+    _webbed_appendage(d, *p['rleg'], ray=28, spread_deg=70, num_toes=4,
+                      dir_deg=_dir(HIR, p['rleg']), color=DARK, outline=_LIMB_OUTLINE)
+
+    # ── 3. BODY ON TOP — covers joint roots naturally ─────────────────────────
+    d.ellipse([28, 90, 228, 240],  fill=BODY, outline=DARK, width=4)   # belly
+    d.ellipse([40, 30, 216, 170],  fill=BODY, outline=DARK, width=4)   # torso
+    d.ellipse([70, 128, 186, 218], fill=BELLY)                          # belly highlight
+
+    # ── 4. EYE BUMPS ─────────────────────────────────────────────────────────
+    d.ellipse([56,  8, 116, 70], fill=BODY, outline=DARK, width=4)
+    d.ellipse([140, 8, 200, 70], fill=BODY, outline=DARK, width=4)
+
+    # ── 5. FACE DETAILS ───────────────────────────────────────────────────────
+    d.ellipse([66,  18, 106, 58], fill=WHITE, outline=BLACK, width=3)
+    d.ellipse([150, 18, 190, 58], fill=WHITE, outline=BLACK, width=3)
+    d.ellipse([80,  30,  96, 50], fill=BLACK)
+    d.ellipse([164, 30, 180, 50], fill=BLACK)
+    # Eye shine
+    d.ellipse([ 82, 32,  90, 40], fill=WHITE)
+    d.ellipse([166, 32, 174, 40], fill=WHITE)
+    # Cheeks
+    d.ellipse([ 54, 110,  90, 140], fill=PINK)
+    d.ellipse([166, 110, 202, 140], fill=PINK)
+    # Mouth — wider grin on the power/kick frame
+    if frame == 3:
+        d.arc([88, 88, 168, 156], start=25, end=155, fill=BLACK, width=6)
+    else:
+        d.arc([96, 90, 160, 150], start=20, end=160, fill=BLACK, width=5)
+
+    return img
+
+
+def draw_fish(frame: int) -> Image.Image:
+    """
+    4-frame swim cycle. Chunky cute tropical fish, 78×78.
+    Head on LEFT (eye/mouth at x≈4-22). Tail fan on RIGHT (x=62→76).
+    SwimmingFish.onLoad applies scale.x=-1 so the fish faces LEFT in-game.
+
+    Animation cycle — 4 truly distinct poses:
+      F1 — tail MAX UP   (peduncle y=27, tip y=6)
+      F2 — center→DOWN   (peduncle y=40, tip y=22)
+      F3 — tail MAX DOWN (peduncle y=53, tip y=71)
+      F4 — center→UP     (peduncle y=34, tip y=14)
+    Tail sweeps ≈65px vertically vs the prior ≈14px.
+    Rear-body taper polygon bends toward peduncle for genuine body flex.
+    Big anime eye (18×22px) with two-tone shine, gill arc, fin rays, scale dots.
+    """
+    import math
+    W = 78
+    img = Image.new("RGBA", (W, W), (0, 0, 0, 0))
+    d   = ImageDraw.Draw(img)
+
+    BODY   = (255, 138,  20, 255)   # warm orange
+    DARK   = (195,  68,   0, 255)   # shadow / outline
+    SHADE  = (220,  90,   8, 135)   # darker dorsal tint (semi-transparent)
+    BELLY  = (255, 215, 140, 255)   # belly highlight
+    FIN    = (255, 218,  55, 255)   # yellow fins / tail
+    FOUT   = (190, 125,   0, 200)   # fin outline
+    STRIPE = ( 28,  12,   4, 225)   # dark body stripe
+    EW     = (255, 255, 255, 255)   # eye white
+    ED     = ( 22,  18,  30, 255)   # eye dark
+
+    # Per-frame: py=peduncle_y, tu=tail-upper-tip-y, tl=tail-lower-tip-y,
+    #            pec=pectoral-fin-tip, dp=dorsal-peak-(x,y)
+    poses = {
+        1: dict(py=27, tu= 6, tl=42, pec=(13, 62), dp=(36,  6)),  # tail UP
+        2: dict(py=40, tu=22, tl=56, pec=(11, 60), dp=(38, 10)),  # center→DOWN
+        3: dict(py=53, tu=37, tl=71, pec=(13, 60), dp=(40,  8)),  # tail DOWN
+        4: dict(py=34, tu=14, tl=50, pec=(14, 63), dp=(35,  7)),  # center→UP
+    }
+    p  = poses[frame]
+    py = p['py']
+    px = 62   # peduncle x (fixed)
+
+    # ── TAIL (drawn first — farthest back in scene) ───────────────────────────
+    d.polygon([(px-3, py-5), (W-2, p['tu']), (px+3, py+4)],
+              fill=FIN, outline=FOUT)                               # upper lobe
+    d.polygon([(px-3, py+5), (W-2, p['tl']), (px+3, py-4)],
+              fill=FIN, outline=FOUT)                               # lower lobe
+    ctail = (p['tu'] + p['tl']) // 2
+    d.line([(px+2, py),   (W-5, ctail)],      fill=FOUT, width=1)  # center ray
+    d.line([(px,   py-3), (W-6, p['tu']+5)],  fill=FOUT, width=1)  # upper ray
+    d.line([(px,   py+3), (W-6, p['tl']-5)],  fill=FOUT, width=1)  # lower ray
+
+    # ── REAR BODY TAPER (bends toward peduncle — shows body flexing) ──────────
+    # Connects the fixed body oval's right edge (x≈50) to the moving peduncle.
+    d.polygon([(50, 26), (px, py-7), (px, py+7), (50, 52)], fill=BODY)
+    d.line([(50, 26), (px, py-7)], fill=DARK, width=2)             # top taper edge
+    d.line([(50, 52), (px, py+7)], fill=DARK, width=2)             # bot taper edge
+    d.ellipse([px-7, py-7, px+7, py+7], fill=BODY)                 # smooth peduncle
+
+    # ── PECTORAL FIN (behind body, protrudes below-left) ─────────────────────
+    d.polygon([(26, 46), p['pec'], (34, 56)], fill=FIN, outline=FOUT)
+
+    # ── MAIN BODY — teardrop: large head circle + oval body ──────────────────
+    d.ellipse([ 4, 22, 54, 56], fill=BODY, outline=DARK, width=2)  # body oval
+    d.ellipse([ 2, 20, 38, 58], fill=BODY, outline=DARK, width=2)  # head circle
+
+    # ── DORSAL SHADING — darker top half gives volume ─────────────────────────
+    d.ellipse([ 8, 22, 50, 36], fill=SHADE)
+
+    # ── BELLY HIGHLIGHT ───────────────────────────────────────────────────────
+    d.ellipse([ 6, 44, 42, 60], fill=BELLY)
+
+    # ── DORSAL FIN (tilts with animation) ────────────────────────────────────
+    dpx, dpy = p['dp']
+    d.polygon([(24, 22), (dpx, dpy), (52, 22)], fill=FIN, outline=FOUT)
+    d.line([(29, 22), (dpx-4, dpy+4)], fill=FOUT, width=1)
+    d.line([(38, 22), (dpx,   dpy+2)], fill=FOUT, width=1)
+    d.line([(47, 22), (dpx+4, dpy+4)], fill=FOUT, width=1)
+
+    # ── STRIPES ───────────────────────────────────────────────────────────────
+    d.rounded_rectangle([27, 24, 33, 55], radius=3, fill=STRIPE)
+    d.rounded_rectangle([39, 24, 45, 55], radius=3, fill=STRIPE)
+
+    # ── GILL ARC ──────────────────────────────────────────────────────────────
+    # Clockwise 90°→270° traces the LEFT semicircle — C-shape opening right.
+    d.arc([26, 30, 38, 52], start=90, end=270, fill=DARK, width=2)
+
+    # ── SCALE TEXTURE (subtle arc dots) ──────────────────────────────────────
+    for sx, sy in [(22, 37), (30, 32), (38, 35), (30, 44), (38, 46)]:
+        d.ellipse([sx-3, sy-2, sx+3, sy+2], outline=(195, 68, 0, 55), width=1)
+
+    # ── EYE (large, anime-style — big sclera, chunky pupil, two shines) ──────
+    d.ellipse([ 4, 24, 22, 46], fill=EW, outline=DARK, width=2)    # sclera
+    d.ellipse([ 7, 27, 19, 43], fill=ED)                            # pupil
+    d.ellipse([ 7, 27, 14, 34], fill=EW)                            # main shine
+    d.ellipse([15, 39, 18, 42], fill=EW)                            # accent shine
+
+    # ── MOUTH ─────────────────────────────────────────────────────────────────
+    d.arc([ 3, 44, 15, 54], start=20, end=160, fill=DARK, width=2)
+
+    return img
+
+
+def draw_jellyfish(frame: int) -> Image.Image:
+    """4-frame pulse cycle. Pink translucent dome with 5 curved tentacles, 78×78."""
+    W  = 78
+    img = Image.new("RGBA", (W, W), (0, 0, 0, 0))
+    d   = ImageDraw.Draw(img)
+
+    r       = {1: 26, 2: 32, 3: 28, 4: 30}[frame]
+    cx, cy  = 39, 26   # moved up to give tentacles more room
+
+    # Per-frame tentacle lengths and mid-point bend offsets (5 tentacles)
+    x_positions = [cx-18, cx-9, cx, cx+9, cx+18]
+    lengths = {1: [28, 32, 26, 32, 28], 2: [34, 38, 30, 38, 34],
+               3: [30, 34, 28, 34, 30], 4: [32, 36, 29, 36, 32]}[frame]
+    bends   = {1: [-4, +2, 0, -2, +4], 2: [+5, -3, +1, +3, -5],
+               3: [-3, +4, -1, -4, +3], 4: [+3, -2, +2, +2, -3]}[frame]
+
+    # ── TENTACLES (drawn first, behind dome) ─────────────────────────────────
+    for tx, tlen, tbend in zip(x_positions, lengths, bends):
+        top_y = cy + r
+        mid_y = int(top_y + tlen * 0.5)
+        bot_y = int(top_y + tlen)
+        mid_x = int(tx + tbend)
+        d.line([(tx, top_y), (mid_x, mid_y)], fill=JELLY_TENT, width=3)
+        d.line([(mid_x, mid_y), (tx, bot_y)],
+               fill=(*JELLY_TENT[:3], 140), width=2)
+
+    # ── OUTER GLOW ────────────────────────────────────────────────────────────
+    gr = r + 4
+    d.pieslice([cx-gr, cy-gr, cx+gr, cy+gr],
+               start=180, end=360, fill=(255, 160, 220, 45))
+
+    # ── DOME ──────────────────────────────────────────────────────────────────
+    d.pieslice([cx-r, cy-r, cx+r, cy+r],
+               start=180, end=360, fill=JELLY_PINK, outline=JELLY_DARK, width=2)
+
+    # Inner highlight (translucent volume)
+    hr = max(8, r - 8)
+    d.pieslice([cx-hr, cy-hr, cx+hr, cy+hr],
+               start=190, end=340, fill=(255, 180, 230, 80))
+
+    # Bioluminescent spots
+    d.ellipse([cx-12, cy-4, cx-5, cy+3], fill=(255, 160, 220, 130))
+    d.ellipse([cx+4,  cy-6, cx+11, cy+1], fill=(255, 160, 220, 130))
+
+    return img
+
+
+def draw_seashell() -> Image.Image:
+    """78×78 golden seashell collectible."""
+    import math
+    W = 78
+    img = Image.new("RGBA", (W, W), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    SHELL = (255, 200, 100, 255)
+    SHELL_D = (200, 140, 50, 255)
+    # Base oval
+    d.ellipse([10, 20, 68, 68], fill=SHELL, outline=SHELL_D, width=2)
+    # Spiral ridges
+    for i, (start, end, rr) in enumerate(
+        [(200, 340, 22), (200, 340, 15), (200, 340, 9)]
+    ):
+        d.arc([39 - rr, 44 - rr, 39 + rr, 44 + rr],
+              start=start, end=end, fill=SHELL_D, width=2)
+    # Shine
+    d.arc([14, 24, 36, 40], start=200, end=320, fill=WHITE, width=3)
+    # Tip at top
+    d.ellipse([33, 10, 45, 24], fill=SHELL, outline=SHELL_D, width=2)
+    return img
+
+
+def draw_starfish() -> Image.Image:
+    """78×78 orange starfish for background decoration."""
+    import math
+    W = 78
+    img = Image.new("RGBA", (W, W), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    STAR   = (255, 120, 40, 255)
+    STAR_D = (200, 70, 20, 255)
+    cx, cy = 39, 39
+    pts = []
+    for i in range(10):
+        angle = math.radians(i * 36 - 90)
+        r = 28 if i % 2 == 0 else 12
+        pts.append((cx + r * math.cos(angle), cy + r * math.sin(angle)))
+    d.polygon(pts, fill=STAR, outline=STAR_D)
+    # Central disc
+    d.ellipse([cx - 9, cy - 9, cx + 9, cy + 9], fill=STAR_D)
+    # Texture dots on arms
+    for i in range(5):
+        angle = math.radians(i * 72 - 90)
+        ax = cx + 18 * math.cos(angle)
+        ay = cy + 18 * math.sin(angle)
+        d.ellipse([ax - 3, ay - 3, ax + 3, ay + 3], fill=STAR_D)
+    return img
+
+
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 def main():
@@ -556,7 +963,10 @@ def main():
         "corazon_yellow.png": draw_heart(YELLOW, (210, 160, 30, 255)),
         "lilypad.png":      draw_lilypad(),
         "obstacle_rock.png": draw_rock(),
-        "obstacle_water_rock.png": draw_water_rock(),
+        "obstacle_water_rock_1.png": draw_water_rock(1),
+        "obstacle_water_rock_2.png": draw_water_rock(2),
+        "obstacle_water_rock_3.png": draw_water_rock(3),
+        "obstacle_water_rock_4.png": draw_water_rock(4),
         "treat_bone.png":   draw_bone(),
         "card_back.png":    draw_card_back(),
         "music_note.png":   draw_music_note(),
@@ -587,6 +997,21 @@ def main():
         "coin_pickup.png": draw_coin(),
         "reed.png": draw_reed(),
         "water_flower.png": draw_water_flower(),
+        # Rhenné Nada swimming game sprites
+        "rhenne_swim_1.png": draw_rhenne_swim(1),
+        "rhenne_swim_2.png": draw_rhenne_swim(2),
+        "rhenne_swim_3.png": draw_rhenne_swim(3),
+        "rhenne_swim_4.png": draw_rhenne_swim(4),
+        "fish_swim_1.png":   draw_fish(1),
+        "fish_swim_2.png":   draw_fish(2),
+        "fish_swim_3.png":   draw_fish(3),
+        "fish_swim_4.png":   draw_fish(4),
+        "jellyfish_1.png":   draw_jellyfish(1),
+        "jellyfish_2.png":   draw_jellyfish(2),
+        "jellyfish_3.png":   draw_jellyfish(3),
+        "jellyfish_4.png":   draw_jellyfish(4),
+        "seashell.png":      draw_seashell(),
+        "starfish.png":      draw_starfish(),
     }
     for name, im in artworks.items():
         path = OUT / name
