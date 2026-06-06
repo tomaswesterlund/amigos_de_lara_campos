@@ -5,7 +5,7 @@ import 'package:flame/effects.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/painting.dart';
 
-import '../../../shared/lara_theme.dart';
+import '../../../core/lara_theme.dart';
 
 /// Floating "+N" text that rises and fades after a pickup is collected.
 /// Colour and size scale with the point value so golden hearts have an

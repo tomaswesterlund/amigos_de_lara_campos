@@ -1,0 +1,9 @@
+lilypad.png
+size:894,302
+filter:Linear,Linear
+pma:true
+lilypad
+bounds:2,16,674,284
+water
+bounds:678,2,298,214
+rotate:90

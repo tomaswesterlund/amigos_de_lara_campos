@@ -1,0 +1,11 @@
+Star.png
+size:1154,728
+filter:Linear,Linear
+pma:true
+glow
+bounds:740,186,108,108
+ray
+bounds:2,2,736,724
+star
+bounds:740,296,430,412
+rotate:90

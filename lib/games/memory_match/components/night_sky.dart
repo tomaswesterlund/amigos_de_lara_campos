@@ -4,7 +4,7 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
 import '../../../shared/collectibles_state.dart';
-import '../../../shared/lara_theme.dart';
+import '../../../core/lara_theme.dart';
 import '../../../shared/qr_unlock_state.dart';
 
 // Y fraction where the ground strip begins (shared by ground and walkers).

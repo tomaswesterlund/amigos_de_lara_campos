@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+2
+version: 1.0.0+3
 
 environment:
   sdk: ^3.11.3
@@ -37,8 +37,10 @@ dependencies:
   audioplayers: ^6.6.0
   flame: ^1.37.0
   flutter_tts: ^4.2.0
+  path_provider: ^2.1.0
   url_launcher: ^6.3.0
   youtube_player_iframe: ^6.0.0
+  flame_spine: ^0.3.0+5
 
 dev_dependencies:
   flutter_test:
@@ -66,9 +68,23 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/images/rhenne_brinca/idle/
+    - assets/images/rhenne_brinca/jump/
+    - assets/images/rhenne_brinca/die/
     - assets/audio/bgm/
     - assets/audio/sfx/
     - assets/icon/
+    - assets/sprites/
+    - assets/sprites/acorn/
+    - assets/sprites/branch/
+    - assets/sprites/coin/
+    - assets/sprites/heart/
+    - assets/sprites/honeycomb/
+    - assets/sprites/lilypad/
+    - assets/sprites/pinecone/
+    - assets/sprites/rhenne/
+    - assets/sprites/star/
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
@@ -103,6 +119,3 @@ flutter_launcher_icons:
   image_path: "assets/icon/app_icon.png"
   adaptive_icon_background: "#E33282"
   adaptive_icon_foreground: "assets/icon/app_icon.png"
-  web:
-    generate: true
-    image_path: "assets/icon/app_icon.png"

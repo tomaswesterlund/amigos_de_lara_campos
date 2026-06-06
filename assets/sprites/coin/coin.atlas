@@ -1,0 +1,13 @@
+coin.png
+size:1168,728
+filter:Linear,Linear
+pma:true
+coin_front
+bounds:740,300,426,426
+coin_side
+bounds:740,218,80,418
+rotate:90
+glow
+bounds:740,108,108,108
+ray
+bounds:2,2,736,724

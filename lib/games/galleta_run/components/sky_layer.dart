@@ -3,7 +3,7 @@ import 'dart:ui';
 
 import 'package:flame/components.dart';
 
-import '../../../shared/lara_theme.dart';
+import '../../../core/lara_theme.dart';
 
 /// Static (non-scrolling) sky backdrop rendered behind everything else.
 ///

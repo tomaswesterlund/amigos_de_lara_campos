@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'shared/lara_theme.dart';
+import 'core/lara_theme.dart';
 
 const _trailerUrl = 'https://www.youtube.com/watch?v=LkfCmSLD7CQ';
 

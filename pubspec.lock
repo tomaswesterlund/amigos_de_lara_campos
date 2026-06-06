@@ -233,6 +233,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.37.0"
+  flame_spine:
+    dependency: "direct main"
+    description:
+      name: flame_spine
+      sha256: e68bec664b60bbb2c9f24c3322e0630cc5092e33d5d4950f1a264dbeda32027a
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.0+5"
   flame_test:
     dependency: "direct dev"
     description:
@@ -336,6 +344,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.8.0"
+  inject_js:
+    dependency: transitive
+    description:
+      name: inject_js
+      sha256: "849eacfd4b7e9182a7e743843a820d74bf1abcb692bdbe09e34ef0f753ad7227"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   io:
     dependency: transitive
     description:
@@ -360,6 +376,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.1"
+  js:
+    dependency: transitive
+    description:
+      name: js
+      sha256: f2c445dce49627136094980615a031419f7f3eb393237e4ecd97ac15dea343f3
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.7"
   json_annotation:
     dependency: transitive
     description:
@@ -489,7 +513,7 @@ packages:
     source: hosted
     version: "1.9.1"
   path_provider:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: path_provider
       sha256: "50c5dd5b6e1aaf6fb3a78b33f6aa3afca52bf903a8a5298f53101fdaee55bbcd"
@@ -653,6 +677,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.10.2"
+  spine_flutter:
+    dependency: transitive
+    description:
+      name: spine_flutter
+      sha256: "6008747eb19fd5f7fbbcee0883afe7aa3b5afdcfc1403c0a4590c64a5a29853e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.3.1"
   stack_trace:
     dependency: transitive
     description:
@@ -725,6 +757,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
+  universal_ffi:
+    dependency: transitive
+    description:
+      name: universal_ffi
+      sha256: a4071511e11b96fc741a91f89dd6891ffce196c45e85f89983beb31cde695dee
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.5.0"
   url_launcher:
     dependency: "direct main"
     description:
@@ -813,6 +853,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "15.2.0"
+  wasm_ffi:
+    dependency: transitive
+    description:
+      name: wasm_ffi
+      sha256: "950238f09e2d18b85c5c4356833a06319b049c1d19f936db32c3f0d8194e30b5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.0"
   watcher:
     dependency: transitive
     description:

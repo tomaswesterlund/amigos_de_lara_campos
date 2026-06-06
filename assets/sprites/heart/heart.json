@@ -1,0 +1,107 @@
+{
+  "skeleton": { "hash": "hIsJQ/qayd4", "spine": "4.3.08", "x": -368, "y": -362, "width": 736, "height": 724, "images": "./images/", "audio": null },
+  "bones": [
+    { "name": "Heart", "color": "2724a7ff", "icon": "arrows", "iconSize": 1.9231 },
+    { "name": "particles", "parent": "Heart", "y": 183.10925, "color": "dc008eff", "icon": "arrows", "iconSize": 1.8481 },
+    { "name": "particles01", "parent": "particles", "rotation": 95.1768, "x": 14.332344, "y": -188.9619, "scaleX": 0.8211464, "scaleY": 0.8211464, "color": "dc008eff", "icon": "diamondB", "iconSize": 2 },
+    { "name": "glow01", "parent": "particles01", "x": -23.30847, "y": -13.208488, "scaleX": 0.6541742, "scaleY": 0.6541742, "inherit": "onlyTranslation", "color": "f6048400" },
+    { "name": "glow02", "parent": "particles01", "x": 43.22938, "y": -53.42776, "scaleX": 0.6541742, "scaleY": 0.6541742, "inherit": "onlyTranslation", "color": "f6048400" },
+    { "name": "glow03", "parent": "particles01", "x": 55.98538, "y": 26.254383, "scaleX": 0.6541742, "scaleY": 0.6541742, "inherit": "onlyTranslation", "color": "f6048400" },
+    { "name": "particles02", "parent": "particles", "rotation": 95.1768, "x": 14.332344, "y": -188.9619, "scaleX": 0.8211464, "scaleY": 0.8211464, "inherit": "noScale", "color": "dc008eff", "icon": "diamondB", "iconSize": 2 },
+    { "name": "glow05", "parent": "particles02", "rotation": -10.78276, "x": 103.77215, "y": -28.01474, "scaleX": 0.4948366, "scaleY": 0.4948366, "inherit": "onlyTranslation", "color": "f6048400" },
+    { "name": "glow06", "parent": "particles02", "rotation": -10.78276, "x": -21.295374, "y": -62.94865, "scaleX": 0.4948366, "scaleY": 0.4948366, "inherit": "onlyTranslation", "color": "f6048400" },
+    { "name": "glow07", "parent": "particles02", "rotation": -10.78276, "x": 113.57603, "y": 56.16066, "scaleX": 0.4948366, "scaleY": 0.4948366, "inherit": "onlyTranslation", "color": "f6048400" },
+    { "name": "ray", "parent": "Heart", "rotation": -6.948416, "scaleX": 0.8042593, "scaleY": 0.8042593, "color": "2724a7ff", "icon": "lightning", "iconSize": 1.7731 },
+    { "name": "ray2", "parent": "Heart", "rotation": -6.948416, "scaleX": 0.5702153, "scaleY": 0.5702153, "color": "2724a7ff", "icon": "lightning", "iconSize": 1.7731 }
+  ],
+  "slots": [
+    { "name": "ray3", "bone": "ray", "color": "ffffff6b", "attachment": "ray" },
+    { "name": "ray4", "bone": "ray2", "color": "ffffff8a", "attachment": "ray", "blend": "additive" },
+    { "name": "heart", "bone": "Heart", "attachment": "heart" },
+    { "name": "glow01", "bone": "glow01", "color": "ffffff00", "attachment": "glow", "blend": "screen" },
+    { "name": "glow05", "bone": "glow05", "color": "ffffff00", "attachment": "glow", "blend": "screen" },
+    { "name": "glow02", "bone": "glow02", "color": "ffffff00", "attachment": "glow", "blend": "screen" },
+    { "name": "glow06", "bone": "glow06", "color": "ffffff00", "attachment": "glow", "blend": "screen" },
+    { "name": "glow03", "bone": "glow03", "color": "ffffff00", "attachment": "glow", "blend": "screen" },
+    { "name": "glow07", "bone": "glow07", "color": "ffffff00", "attachment": "glow", "blend": "screen" }
+  ],
+  "skins": [
+    {
+      "name": "default",
+      "attachments": {
+        "glow01": { "glow": { "type": "mesh", "color": "ffffffc7", "uvs": [1, 1, 0, 1, 0, 0, 1, 0], "triangles": [1, 2, 3, 1, 3, 0], "vertices": [32.92, -35.84, -37.97, -35.84, -37.97, 35.05, 32.92, 35.05], "hull": 4, "edges": [0, 2, 2, 4, 4, 6, 0, 6], "width": 108.0, "height": 108.0 } },
+        "glow02": { "glow": { "type": "mesh", "color": "ffffffc7", "uvs": [1, 1, 0, 1, 0, 0, 1, 0], "triangles": [1, 2, 3, 1, 3, 0], "vertices": [32.92, -35.84, -37.97, -35.84, -37.97, 35.05, 32.92, 35.05], "hull": 4, "edges": [0, 2, 2, 4, 4, 6, 0, 6], "width": 108.0, "height": 108.0 } },
+        "glow03": { "glow": { "type": "mesh", "color": "ffffffc7", "uvs": [1, 1, 0, 1, 0, 0, 1, 0], "triangles": [1, 2, 3, 1, 3, 0], "vertices": [32.92, -35.84, -37.97, -35.84, -37.97, 35.05, 32.92, 35.05], "hull": 4, "edges": [0, 2, 2, 4, 4, 6, 0, 6], "width": 108.0, "height": 108.0 } },
+        "glow05": { "glow": { "type": "mesh", "color": "ffffffc7", "uvs": [1, 1, 0, 1, 0, 0, 1, 0], "triangles": [1, 2, 3, 1, 3, 0], "vertices": [32.92, -35.84, -37.97, -35.84, -37.97, 35.05, 32.92, 35.05], "hull": 4, "edges": [0, 2, 2, 4, 4, 6, 0, 6], "width": 108.0, "height": 108.0 } },
+        "glow06": { "glow": { "type": "mesh", "color": "ffffffc7", "uvs": [1, 1, 0, 1, 0, 0, 1, 0], "triangles": [1, 2, 3, 1, 3, 0], "vertices": [32.92, -35.84, -37.97, -35.84, -37.97, 35.05, 32.92, 35.05], "hull": 4, "edges": [0, 2, 2, 4, 4, 6, 0, 6], "width": 108.0, "height": 108.0 } },
+        "glow07": { "glow": { "type": "mesh", "color": "ffffffc7", "uvs": [1, 1, 0, 1, 0, 0, 1, 0], "triangles": [1, 2, 3, 1, 3, 0], "vertices": [32.92, -35.84, -37.97, -35.84, -37.97, 35.05, 32.92, 35.05], "hull": 4, "edges": [0, 2, 2, 4, 4, 6, 0, 6], "width": 108.0, "height": 108.0 } },
+        "heart": { "heart": { "type": "mesh", "uvs": [1, 1, 0, 1, 0, 0, 1, 0], "triangles": [1, 2, 3, 1, 3, 0], "vertices": [197.0, -193.0, -197.0, -193.0, -197.0, 193.0, 197.0, 193.0], "hull": 4, "edges": [0, 2, 2, 4, 4, 6, 0, 6], "width": 394.0, "height": 386.0 } },
+        "ray3": { "ray": { "type": "mesh", "uvs": [1, 1, 0, 1, 0, 0, 1, 0], "triangles": [1, 2, 3, 1, 3, 0], "vertices": [508.65, -391.44, -399.75, -502.15, -508.65, 391.44, 399.75, 502.15], "hull": 4, "edges": [0, 2, 2, 4, 4, 6, 0, 6], "width": 736.0, "height": 724.0 } },
+        "ray4": { "ray": { "type": "mesh", "uvs": [1, 1, 0, 1, 0, 0, 1, 0], "triangles": [1, 2, 3, 1, 3, 0], "vertices": [508.65, -391.44, -399.75, -502.15, -508.65, 391.44, 399.75, 502.15], "hull": 4, "edges": [0, 2, 2, 4, 4, 6, 0, 6], "width": 736.0, "height": 724.0 } }
+      }
+    }
+  ],
+  "animations": {
+    "animation": {
+      "slots": {
+        "glow01": {
+          "rgba": [
+            { "time": 0.2666667, "color": "ffffff00" },
+            { "time": 0.4, "color": "ffffffff" },
+            { "time": 0.5666666, "color": "ffffff00" }
+          ]
+        },
+        "glow02": {
+          "rgba": [
+            { "time": 0.2666667, "color": "ffffff00" },
+            { "time": 0.4, "color": "ffffffff" },
+            { "time": 0.5666666, "color": "ffffff00" }
+          ]
+        },
+        "glow03": {
+          "rgba": [
+            { "time": 0.2666667, "color": "ffffff00" },
+            { "time": 0.4, "color": "ffffffff" },
+            { "time": 0.5666666, "color": "ffffff00" }
+          ]
+        },
+        "glow05": {
+          "rgba": [
+            { "time": 0.3666667, "color": "ffffff00" },
+            { "time": 0.5, "color": "ffffffff" },
+            { "time": 0.5666666, "color": "ffffff00" }
+          ]
+        },
+        "glow06": {
+          "rgba": [
+            { "time": 0.3666667, "color": "ffffff00" },
+            { "time": 0.5, "color": "ffffffff" },
+            { "time": 0.5666666, "color": "ffffff00" }
+          ]
+        },
+        "glow07": {
+          "rgba": [
+            { "time": 0.3666667, "color": "ffffff00" },
+            { "time": 0.5, "color": "ffffff31" },
+            { "time": 0.5666666, "color": "ffffff00" }
+          ]
+        },
+        "ray4": { "rgba": [{ "color": "ffffff00" }, { "time": 0.5, "color": "ffffff59" }, { "time": 1, "color": "ffffff00" }] }
+      },
+      "bones": {
+        "Heart": { "scale": [{}, { "time": 0.5, "x": 1.1, "y": 1.1 }, { "time": 1 }] },
+        "particles01": { "scale": [{ "time": 0.3333333 }, { "time": 0.5, "x": 3.5436354, "y": 3.5436354, "curve": "stepped" }, { "time": 0.9, "x": 3.5436354, "y": 3.5436354 }, { "time": 1 }] },
+        "particles02": { "scale": [{ "time": 0.3333333 }, { "time": 0.5, "x": 2.636062, "y": 2.636062, "curve": "stepped" }, { "time": 0.9, "x": 2.636062, "y": 2.636062 }, { "time": 1 }] },
+        "ray": {
+          "rotate": [{}, { "time": 0.5, "value": -20 }, { "time": 1 }],
+          "scale": [
+            { "x": 0.7132814, "y": 0.7132814 },
+            { "time": 0.5, "x": 0.9231329, "y": 0.9231329 },
+            { "time": 1, "x": 0.7132814, "y": 0.7132814 }
+          ]
+        },
+        "ray2": { "rotate": [{}, { "time": 0.5, "value": -20 }, { "time": 1 }], "scale": [{}, { "time": 0.5, "x": 0.8079387, "y": 0.8079387 }, { "time": 1 }] }
+      }
+    }
+  }
+}

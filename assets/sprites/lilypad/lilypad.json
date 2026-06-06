@@ -1,0 +1,32 @@
+{
+  "skeleton": { "hash": "14nF8DAtfpg", "spine": "4.3.08", "x": -367.4528, "y": -154.797, "width": 789.432, "height": 296.797, "images": "./images/", "audio": null },
+  "bones": [
+    { "name": "Lilipad", "color": "da3636ff", "icon": "arrowsB", "iconSize": 1.5781 },
+    { "name": "water", "parent": "Lilipad", "x": -301.6877, "y": -36.17046, "color": "1b00a9ff", "icon": "arrowLeft", "iconSize": 1.4056 },
+    { "name": "water2", "parent": "Lilipad", "x": 356.21405, "y": -42.05924, "scaleX": -1, "color": "1b00a9ff", "icon": "arrowLeft", "iconSize": 1.4056 }
+  ],
+  "slots": [
+    { "name": "water", "bone": "water", "color": "ffffff00", "attachment": "water" },
+    { "name": "water2", "bone": "water2", "color": "ffffff00", "attachment": "water" },
+    { "name": "lilypad", "bone": "Lilipad", "attachment": "lilypad" }
+  ],
+  "skins": [
+    {
+      "name": "default",
+      "attachments": {
+        "lilypad": { "lilypad": { "type": "mesh", "uvs": [1, 1, 0, 1, 0, 0, 1, 0], "triangles": [1, 2, 3, 1, 3, 0], "vertices": [337.0, -142.0, -337.0, -142.0, -337.0, 142.0, 337.0, 142.0], "hull": 4, "edges": [0, 2, 2, 4, 4, 6, 0, 6], "width": 674.0, "height": 284.0 } },
+        "water": { "water": { "type": "mesh", "uvs": [1, 1, 0, 1, 0, 0, 1, 0], "triangles": [1, 2, 3, 1, 3, 0], "vertices": [232.23, -112.74, -65.77, -112.74, -65.77, 101.26, 232.23, 101.26], "hull": 4, "edges": [0, 2, 2, 4, 4, 6, 0, 6], "width": 298.0, "height": 214.0 } },
+        "water2": { "water": { "type": "mesh", "uvs": [1, 1, 0, 1, 0, 0, 1, 0], "triangles": [1, 2, 3, 1, 3, 0], "vertices": [232.23, -112.74, -65.77, -112.74, -65.77, 101.26, 232.23, 101.26], "hull": 4, "edges": [0, 2, 2, 4, 4, 6, 0, 6], "width": 298.0, "height": 214.0 } }
+      }
+    }
+  ],
+  "animations": {
+    "animation": {
+      "slots": { "water": { "rgba": [{ "color": "ffffff00" }, { "time": 0.4666667, "color": "ffffff7c" }, { "time": 0.6, "color": "ffffff00" }] }, "water2": { "rgba": [{ "color": "ffffff00" }, { "time": 0.4666667, "color": "ffffff7c" }, { "time": 0.6, "color": "ffffff00" }] } },
+      "bones": {
+        "water": { "translate": [{}, { "time": 0.4666667, "x": -32.92944, "y": -16.052986 }, { "time": 0.6, "x": -47.56476, "y": -23.18765 }, { "time": 1 }], "scale": [{ "x": 0.5887906, "y": 0.5887906 }, { "time": 0.4666667, "x": 0.7799237, "y": 0.7799237 }, { "time": 0.6, "x": 0.8648717, "y": 0.8648717 }, { "time": 1 }] },
+        "water2": { "translate": [{}, { "time": 0.4666667, "x": -32.92944, "y": -16.052986 }, { "time": 0.6, "x": -47.56476, "y": -23.18765 }, { "time": 1 }], "scale": [{ "x": 0.5887906, "y": 0.5887906 }, { "time": 0.4666667, "x": 0.7799237, "y": 0.7799237 }, { "time": 0.6, "x": 0.8648717, "y": 0.8648717 }, { "time": 1 }] }
+      }
+    }
+  }
+}

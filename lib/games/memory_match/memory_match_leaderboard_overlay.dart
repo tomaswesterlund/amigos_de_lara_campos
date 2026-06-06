@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../shared/lara_button.dart';
-import '../../shared/lara_theme.dart';
+import '../../widgets/lara_button.dart';
+import '../../core/lara_theme.dart';
 import 'memory_match_leaderboard.dart';
 
 /// Game-over overlay for Memoria Amigos. Shows the in-memory leaderboard

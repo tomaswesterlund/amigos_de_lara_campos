@@ -1,0 +1,11 @@
+heart.png
+size:1128,728
+filter:Linear,Linear
+pma:true
+glow
+bounds:740,222,108,108
+heart
+bounds:740,332,394,386
+rotate:90
+ray
+bounds:2,2,736,724

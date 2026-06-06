@@ -1,11 +1,14 @@
+import 'package:flame_spine/flame_spine.dart';
 import 'package:flutter/material.dart';
-
-import 'home_screen.dart';
-import 'shared/lara_audio.dart';
-import 'shared/lara_theme.dart';
+import 'package:flutter/services.dart';
+import 'package:lara_demo/screens/home_screen.dart';
+import 'core/lara_audio.dart';
+import 'core/lara_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  await initSpineFlutter();
   await LaraAudio.init();
   runApp(const AmigosDeLaraApp());
 }
@@ -19,7 +22,7 @@ class AmigosDeLaraApp extends StatelessWidget {
       title: 'Amigos de Lara!',
       debugShowCheckedModeBanner: false,
       theme: buildLaraTheme(),
-      home: const HomeScreen(),
+      home: HomeScreen(),
     );
   }
 }

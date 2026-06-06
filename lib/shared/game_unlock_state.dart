@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart' show visibleForTesting;
 
-import 'coin_wallet.dart';
+import '../widgets/coin_wallet.dart';
 
 class GameUnlockState {
   GameUnlockState._();
