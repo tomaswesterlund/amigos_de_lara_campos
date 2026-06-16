@@ -7,10 +7,10 @@ import 'lara_audio.dart';
 
 class LaraLeaderboardEntry {
   final String name;
-  final int score;
+  final int points;
   final DateTime timestamp;
 
-  LaraLeaderboardEntry({required this.name, required this.score, required this.timestamp});
+  LaraLeaderboardEntry({required this.name, required this.points, required this.timestamp});
 }
 
 abstract class LaraBaseGame extends FlameGame {
@@ -19,8 +19,11 @@ abstract class LaraBaseGame extends FlameGame {
 
   LaraBaseGame({required this.gradient, this.bgm});
 
-  int _score = 0;
-  int get score => _score;
+  int _points = 0;
+  int get points => _points;
+
+  int _coins = 0;
+  int get coins => _coins;
 
   String? _gameOverMessage;
   String? get gameOverMessage => _gameOverMessage;
@@ -31,18 +34,24 @@ abstract class LaraBaseGame extends FlameGame {
   VoidCallback? _onHome;
   VoidCallback? get onHome => _onHome;
 
-  /// Holds the leaderboard listings during runtime for this specific session.
   final List<LaraLeaderboardEntry> _leaderboardEntries = [];
   List<LaraLeaderboardEntry> get leaderboardEntries => List.unmodifiable(_leaderboardEntries);
 
-  /// Tracks the precise run item instance that was just created on death
-  /// so that the layout UI can accurately highlight your score line.
   LaraLeaderboardEntry? _justPlayedEntry;
   LaraLeaderboardEntry? get justPlayedEntry => _justPlayedEntry;
 
+  void addCoins(int value) {
+    _coins += value;
+  }
+
+  void addPoints(int value) {
+    _points += value;
+    refreshHud();
+  }
+
   void setScore(int value) {
-    if (value == _score) return;
-    _score = value;
+    if (value == _points) return;
+    _points = value;
     refreshHud();
   }
 
@@ -53,25 +62,18 @@ abstract class LaraBaseGame extends FlameGame {
     }
   }
 
-  /// Calculates the placement ranking for an entry item.
   int getRankOf(LaraLeaderboardEntry entry) {
-    // Sort matching entries descending by score value
-    final sorted = List<LaraLeaderboardEntry>.from(_leaderboardEntries)..sort((a, b) => b.score.compareTo(a.score));
+    final sorted = List<LaraLeaderboardEntry>.from(_leaderboardEntries)..sort((a, b) => b.points.compareTo(a.points));
 
     final index = sorted.indexWhere((e) => identical(e, entry));
     return index != -1 ? index + 1 : sorted.length + 1;
   }
 
-  /// Seeds mock high scores if the leaderboard history list is empty.
-  /// This generates believable target scores anchored around the player's performance.
   void _ensureInitialLeaderboardEntries() {
     if (_leaderboardEntries.isNotEmpty) return;
 
     final random = Random();
-
-    // Generate 4 baseline scores. We anchor them around the player's score
-    // so the competition feels realistic whether they scored 10 points or 500 points.
-    final baseValue = _score < 20 ? 20 : _score;
+    final baseValue = _points < 20 ? 20 : _points;
 
     final mockData = [
       {'name': 'Rhenne', 'multiplier': 1.5},
@@ -84,12 +86,15 @@ abstract class LaraBaseGame extends FlameGame {
       final name = mock['name'] as String;
       final multiplier = mock['multiplier'] as double;
 
-      // Add a little variance so scores aren't identical on every game-over screen
       final variance = (baseValue * 0.1 * (0.5 - random.nextDouble()));
       final mockScore = ((baseValue * multiplier) + variance).round().clamp(1, 9999);
 
       _leaderboardEntries.add(
-        LaraLeaderboardEntry(name: name, score: mockScore, timestamp: DateTime.now().subtract(const Duration(days: 1))),
+        LaraLeaderboardEntry(
+          name: name,
+          points: mockScore,
+          timestamp: DateTime.now().subtract(const Duration(days: 1)),
+        ),
       );
     }
   }
@@ -98,7 +103,7 @@ abstract class LaraBaseGame extends FlameGame {
     required String message,
     required VoidCallback onRestart,
     required VoidCallback onHome,
-    String defaultPlayerName = 'Lupita',
+    String defaultPlayerName = 'Amigo de Lara',
   }) {
     _gameOverMessage = message;
     _onRestart = onRestart;
@@ -106,10 +111,10 @@ abstract class LaraBaseGame extends FlameGame {
 
     _ensureInitialLeaderboardEntries();
 
-    _justPlayedEntry = LaraLeaderboardEntry(name: defaultPlayerName, score: _score, timestamp: DateTime.now());
+    _justPlayedEntry = LaraLeaderboardEntry(name: defaultPlayerName, points: _points, timestamp: DateTime.now());
     _leaderboardEntries.add(_justPlayedEntry!);
-    _leaderboardEntries.sort((a, b) => b.score.compareTo(a.score));
-    
+    _leaderboardEntries.sort((a, b) => b.points.compareTo(a.points));
+
     pauseEngine();
     LaraAudio.stopBgm();
     overlays.add('gameOver');

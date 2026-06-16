@@ -1,0 +1,8 @@
+bird.png
+size:884,396
+filter:Linear,Linear
+pma:true
+bird
+bounds:2,2,596,392
+wing
+bounds:600,74,282,320

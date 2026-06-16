@@ -17,7 +17,7 @@ class GameScaffold extends StatefulWidget {
     required this.builder,
     this.scoreLabel = 'Puntos',
     this.gameOverBuilder,
-    this.coinReward,
+
     this.additionalOverlays,
   });
 
@@ -25,7 +25,6 @@ class GameScaffold extends StatefulWidget {
   final LaraBaseGame Function() builder;
   final String scoreLabel;
   final GameOverOverlayBuilder? gameOverBuilder;
-  final int Function(LaraBaseGame game)? coinReward;
   final Map<String, Widget Function(BuildContext, LaraBaseGame)>? additionalOverlays;
 
   @override
@@ -57,17 +56,15 @@ class _GameScaffoldState extends State<GameScaffold> {
         key: ValueKey(_game),
         game: _game,
         overlayBuilderMap: {
-          'hud': (context, game) => PointsOverlay(label: widget.scoreLabel, score: game.score),
+          'hud': (context, game) => PointsOverlay(label: widget.scoreLabel, score: game.points),
           ...?widget.additionalOverlays,
           'gameOver': (context, game) {
             // Phase A: show coin reward before game-over if configured.
 
-            if (widget.coinReward != null && !_coinPhaseComplete) {
-              return CoinRewardOverlay(
-                coins: widget.coinReward!(game),
-                onContinue: () => setState(() => _coinPhaseComplete = true),
-              );
+            if (!_coinPhaseComplete) {
+              return CoinRewardOverlay(coins: game.coins, onContinue: () => setState(() => _coinPhaseComplete = true));
             }
+            
             void restart() {
               game.clearGameOver();
               _restart();
@@ -87,16 +84,16 @@ class _GameScaffoldState extends State<GameScaffold> {
               LeaderboardEntry(name: 'Elena', score: 500),
             ];
 
-            final justPlayedRank = topEntries.where((entry) => entry.score > game.score).length + 1;
+            final justPlayedRank = topEntries.where((entry) => entry.score > game.points).length + 1;
 
             return GameOverOverlay(
               title: game.gameOverMessage ?? '¡Bien hecho!',
-              subtitle: 'Puntuación: ${game.score}',
+              subtitle: 'Puntuación: ${game.points}',
               rankMessageBuilder: (rank, isTopFive) {
                 return isTopFive ? '¡Entraste al Top 5! 🎉' : '¡Tu posición es la #$rank!';
               },
               topEntries: topEntries,
-              justPlayedEntry: LeaderboardEntry(name: 'Jugador', score: game.score),
+              justPlayedEntry: LeaderboardEntry(name: 'Jugador', score: game.points),
               justPlayedRank: justPlayedRank,
               onRestart: restart,
               onHome: home,

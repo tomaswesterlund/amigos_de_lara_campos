@@ -1,10 +1,11 @@
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flame_spine/flame_spine.dart';
 import 'package:lara_demo/core/constants.dart';
 
 class CoinComponent extends PositionComponent {
-  CoinComponent({required super.size}) : super(anchor: Anchor.center);
+  CoinComponent({required super.size, super.position}) : super(anchor: Anchor.center);
 
   late final SpineComponent _spine;
 
@@ -22,15 +23,7 @@ class CoinComponent extends PositionComponent {
     );
 
     _spine.scale = Vector2(size.x / _spine.size.x, size.y / _spine.size.y);
-
-    await add(
-      RectangleHitbox.relative(
-        Vector2(0.7, 1.0),
-        parentSize: size,
-        anchor: Anchor.center,
-        position: size / 2,
-      ),
-    );
+    await add(CircleHitbox(radius: size.y / 4, anchor: Anchor.center, position: size / 2 + Vector2(0, size.y * 0.1)));
 
     await add(_spine);
 
@@ -41,6 +34,15 @@ class CoinComponent extends PositionComponent {
     _spine.animationState.setAnimation(0, 'animation', true);
   }
 
-  @override
-  void onMount() {}
+  void move(Vector2 targetPosition, double duration) {
+    add(
+      MoveByEffect(
+        targetPosition,
+        EffectController(duration: duration),
+        onComplete: () {
+          removeFromParent();
+        },
+      ),
+    );
+  }
 }

@@ -5,9 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:lara_demo/core/constants.dart';
 
 class WaveIndicatorComponent extends PositionComponent {
+  final VoidCallback? onComplete;
   final int waveNumber;
 
-  WaveIndicatorComponent({required this.waveNumber, required Vector2 position})
+  WaveIndicatorComponent({required this.waveNumber, required Vector2 position, this.onComplete})
     : super(position: position, anchor: Anchor.topLeft, size: Vector2(200, 50));
 
   @override
@@ -15,11 +16,17 @@ class WaveIndicatorComponent extends PositionComponent {
     debugMode = Constants.DEBUG;
 
     add(
-      SequenceEffect([
-        ScaleEffect.by(Vector2.all(1.2), EffectController(duration: 0.3, curve: Curves.easeOut)),
-        MoveByEffect(Vector2(0, -30), EffectController(duration: 1.0)),
-        ScaleEffect.to(Vector2.zero(), EffectController(duration: 0.2, curve: Curves.easeIn)),
-      ], onComplete: removeFromParent),
+      SequenceEffect(
+        [
+          ScaleEffect.by(Vector2.all(1.2), EffectController(duration: 0.3, curve: Curves.easeOut)),
+          MoveByEffect(Vector2(0, -30), EffectController(duration: 1.0)),
+          ScaleEffect.to(Vector2.zero(), EffectController(duration: 0.2, curve: Curves.easeIn)),
+        ],
+        onComplete: () {
+          onComplete?.call();
+          removeFromParent();
+        },
+      ),
     );
   }
 

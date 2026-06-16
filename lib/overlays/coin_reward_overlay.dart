@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../widgets/coin_wallet.dart';
-import '../shared/collectibles_state.dart';
+import '../widgets/collectibles_state.dart';
 import '../core/lara_audio.dart';
 import '../widgets/lara_button.dart';
 import '../core/lara_theme.dart';
 
-/// Shown immediately after a game ends (before the game-over card / leaderboard).
-/// Awards [coins] to the wallet, plays a coin SFX, then displays a scrollable
-/// collectible showcase before the player taps "¡Continuar!".
 class CoinRewardOverlay extends StatefulWidget {
   const CoinRewardOverlay({super.key, required this.coins, required this.onContinue});
 
@@ -22,7 +19,6 @@ class CoinRewardOverlay extends StatefulWidget {
 class _CoinRewardOverlayState extends State<CoinRewardOverlay> {
   static const _chars = ['rhenne', 'galleta', 'heart'];
 
-  // Tracks the most recently unlocked item so its card can animate.
   ({String char, int index})? _justUnlocked;
 
   @override
@@ -95,9 +91,10 @@ class _CoinRewardOverlayState extends State<CoinRewardOverlay> {
                           '¡Ooops!',
                           style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: LaraColors.magenta),
                         ),
-                        SizedBox(height: 2),
+                        SizedBox(height: 4),
                         Text(
-                          '¡Inténtalo otra vez!',
+                          'Inténtalo otra vez para conseguir monedas Lara para los amigos de Lara.',
+                          textAlign: TextAlign.center,
                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: LaraColors.ink),
                         ),
                       ],
@@ -179,11 +176,7 @@ class _CoinRewardOverlayState extends State<CoinRewardOverlay> {
   }
 }
 
-// ─── Card state enum ──────────────────────────────────────────────────────────
-
 enum _CardState { unlocked, affordable, locked }
-
-// ─── Fixed-height section area ────────────────────────────────────────────────
 
 class _SectionArea extends StatelessWidget {
   const _SectionArea({required this.empty, required this.emptyMessage, required this.emptyColor, required this.child});
@@ -213,8 +206,6 @@ class _SectionArea extends StatelessWidget {
   }
 }
 
-// ─── Locked collectibles grid (affordable first, then locked) ─────────────────
-
 class _LockedGrid extends StatelessWidget {
   const _LockedGrid({required this.affordable, required this.unaffordable, required this.onUnlock});
 
@@ -235,7 +226,6 @@ class _LockedGrid extends StatelessWidget {
       rows.add(all.sublist(i, (i + 3).clamp(0, all.length)));
     }
 
-    // card ~76px tall, gap 10px → 2 visible rows = 162px
     return ConstrainedBox(
       constraints: const BoxConstraints(maxHeight: 162),
       child: SingleChildScrollView(
@@ -269,8 +259,6 @@ class _LockedGrid extends StatelessWidget {
   }
 }
 
-// ─── Horizontal collectible row ───────────────────────────────────────────────
-
 class _CollectibleRow extends StatelessWidget {
   const _CollectibleRow({required this.items, required this.state, this.justUnlocked});
 
@@ -303,8 +291,6 @@ class _CollectibleRow extends StatelessWidget {
   }
 }
 
-// ─── Individual collectible card ──────────────────────────────────────────────
-
 class _CollectibleCard extends StatefulWidget {
   const _CollectibleCard({
     super.key,
@@ -314,8 +300,6 @@ class _CollectibleCard extends StatefulWidget {
     this.onUnlock,
     this.isNew = false,
   });
-
-  static const _assetPrefix = {'rhenne': 'rhenne', 'galleta': 'galleta', 'heart': 'corazon'};
 
   final String char;
   final int index;
@@ -375,7 +359,7 @@ class _CollectibleCardState extends State<_CollectibleCard> with SingleTickerPro
   @override
   Widget build(BuildContext context) {
     final cost = CollectiblesState.costs[widget.index];
-    final asset = 'assets/images/${_CollectibleCard._assetPrefix[widget.char]}_l${widget.index + 1}.png';
+    final asset = 'assets/images/collectibles/${widget.char}/${widget.char}_l${widget.index + 1}.png';
     final isUnlocked = widget.state == _CardState.unlocked;
     final isAffordable = widget.state == _CardState.affordable;
 

@@ -17,19 +17,14 @@ class DailyBonusDialog extends StatefulWidget {
   static void showIfNeeded(BuildContext context) {
     if (_shown) return;
     _shown = true;
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const DailyBonusDialog(),
-    );
+    showDialog<void>(context: context, barrierDismissible: false, builder: (_) => const DailyBonusDialog());
   }
 
   @override
   State<DailyBonusDialog> createState() => _DailyBonusDialogState();
 }
 
-class _DailyBonusDialogState extends State<DailyBonusDialog>
-    with TickerProviderStateMixin {
+class _DailyBonusDialogState extends State<DailyBonusDialog> with TickerProviderStateMixin {
   // Single controller drives all 5 coins via staggered Interval curves.
   late final AnimationController _coinsController;
   final List<Animation<double>> _coinScales = [];
@@ -44,23 +39,14 @@ class _DailyBonusDialogState extends State<DailyBonusDialog>
   bool _claimed = false;
 
   // Arc positions for the 5 coins, centered in the widget.
-  static const _arcOffsets = [
-    Offset(-88, 16),
-    Offset(-44, -8),
-    Offset(0, -18),
-    Offset(44, -8),
-    Offset(88, 16),
-  ];
+  static const _arcOffsets = [Offset(-88, 16), Offset(-44, -8), Offset(0, -18), Offset(44, -8), Offset(88, 16)];
 
   @override
   void initState() {
     super.initState();
 
     // 900 ms total; coin i starts at i*16% of the timeline.
-    _coinsController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 900),
-    );
+    _coinsController = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
     for (int i = 0; i < 5; i++) {
       final start = i * 0.16;
       final end = (start + 0.45).clamp(0.0, 1.0);
@@ -70,12 +56,7 @@ class _DailyBonusDialogState extends State<DailyBonusDialog>
         TweenSequence<double>([
           TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.25), weight: 60),
           TweenSequenceItem(tween: Tween(begin: 1.25, end: 1.0), weight: 40),
-        ]).animate(
-          CurvedAnimation(
-            parent: _coinsController,
-            curve: Interval(start, end),
-          ),
-        ),
+        ]).animate(CurvedAnimation(parent: _coinsController, curve: Interval(start, end))),
       );
       _coinOpacities.add(
         Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -87,13 +68,11 @@ class _DailyBonusDialogState extends State<DailyBonusDialog>
       );
     }
 
-    _buttonController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
-    _buttonOpacity = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _buttonController, curve: Curves.easeIn),
-    );
+    _buttonController = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
+    _buttonOpacity = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _buttonController, curve: Curves.easeIn));
 
     _runSequence();
   }
@@ -142,24 +121,14 @@ class _DailyBonusDialogState extends State<DailyBonusDialog>
           color: Colors.white,
           borderRadius: BorderRadius.circular(32),
           border: Border.all(color: LaraColors.yellow, width: 4),
-          boxShadow: const [
-            BoxShadow(
-              offset: Offset(0, 6),
-              blurRadius: 0,
-              color: LaraColors.galletaBrown,
-            ),
-          ],
+          boxShadow: const [BoxShadow(offset: Offset(0, 6), blurRadius: 0, color: LaraColors.galletaBrown)],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
               '¡Bonus Diario!',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w900,
-                color: LaraColors.magenta,
-              ),
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: LaraColors.magenta),
             ),
             const SizedBox(height: 24),
             // Arc of 5 coins
@@ -169,11 +138,7 @@ class _DailyBonusDialogState extends State<DailyBonusDialog>
                 alignment: Alignment.center,
                 children: [
                   for (int i = 0; i < 5; i++)
-                    _ArcCoin(
-                      scale: _coinScales[i],
-                      opacity: _coinOpacities[i],
-                      offset: _arcOffsets[i],
-                    ),
+                    _ArcCoin(scale: _coinScales[i], opacity: _coinOpacities[i], offset: _arcOffsets[i]),
                 ],
               ),
             ),
@@ -186,13 +151,7 @@ class _DailyBonusDialogState extends State<DailyBonusDialog>
                   fontSize: 34,
                   fontWeight: FontWeight.w900,
                   color: LaraColors.yellow,
-                  shadows: [
-                    Shadow(
-                      offset: Offset(0, 3),
-                      blurRadius: 0,
-                      color: LaraColors.galletaBrown,
-                    ),
-                  ],
+                  shadows: [Shadow(offset: Offset(0, 3), blurRadius: 0, color: LaraColors.galletaBrown)],
                 ),
               ),
             ),
@@ -201,10 +160,7 @@ class _DailyBonusDialogState extends State<DailyBonusDialog>
               animation: _buttonOpacity,
               builder: (_, child) => Opacity(
                 opacity: _buttonOpacity.value,
-                child: IgnorePointer(
-                  ignoring: _buttonOpacity.value < 0.5,
-                  child: child,
-                ),
+                child: IgnorePointer(ignoring: _buttonOpacity.value < 0.5, child: child),
               ),
               child: LaraButton(
                 label: '¡Recibido!',
@@ -221,11 +177,7 @@ class _DailyBonusDialogState extends State<DailyBonusDialog>
 }
 
 class _ArcCoin extends StatelessWidget {
-  const _ArcCoin({
-    required this.scale,
-    required this.opacity,
-    required this.offset,
-  });
+  const _ArcCoin({required this.scale, required this.opacity, required this.offset});
 
   final Animation<double> scale;
   final Animation<double> opacity;
@@ -239,41 +191,10 @@ class _ArcCoin extends StatelessWidget {
         offset: offset,
         child: Transform.scale(
           scale: scale.value,
-          child: Opacity(
-            opacity: opacity.value,
-            child: Container(
-              width: 46,
-              height: 46,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: LaraColors.yellow,
-                border:
-                    Border.all(color: LaraColors.galletaBrown, width: 2.5),
-                boxShadow: [
-                  BoxShadow(
-                    color: LaraColors.yellow.withValues(alpha: 0.7),
-                    blurRadius: 14,
-                    spreadRadius: 3,
-                  ),
-                  const BoxShadow(
-                    offset: Offset(0, 3),
-                    blurRadius: 0,
-                    color: LaraColors.galletaBrown,
-                  ),
-                ],
-              ),
-              child: const Center(
-                child: Text(
-                  '★',
-                  style: TextStyle(
-                    fontSize: 22,
-                    color: LaraColors.galletaBrown,
-                    height: 1,
-                  ),
-                ),
-              ),
-            ),
-          ),
+          child: Opacity(opacity: opacity.value, child: SizedBox(
+            width: 96,
+            height: 96,
+            child: Image.asset('assets/images/coin_asset.png'))),
         ),
       ),
     );

@@ -102,6 +102,9 @@ class RhennePlayerCharacterComponent extends PositionComponent with CollisionCal
   }
 
   void jumpTo(Vector2 targetPosition) {
+    if (isJumping) return;
+    _currentState = RhennePlayerCharacterState.jump;
+
     setAnimation(RhennePlayerCharacterState.jump);
 
     const jumpDuration = 0.4;
@@ -112,19 +115,25 @@ class RhennePlayerCharacterComponent extends PositionComponent with CollisionCal
     final deltaY = targetPosition.y - position.y;
 
     add(
-      SequenceEffect([
-        // First half: Move halfway on X, and arc UP by the jumpHeight
-        MoveEffect.by(
-          Vector2(deltaX / 2, deltaY / 2 - jumpHeight),
-          EffectController(duration: jumpDuration / 2, curve: Curves.easeOutQuad),
-        ),
-        // Second half: Move the remaining halfway on X, and drop DOWN to the target Y
-        MoveEffect.by(
-          Vector2(deltaX / 2, deltaY / 2 + jumpHeight),
-          EffectController(duration: jumpDuration / 2, curve: Curves.easeInQuad),
-        ),
-      ]),
+      SequenceEffect(
+        [
+          // First half: Move halfway on X, and arc UP by the jumpHeight
+          MoveEffect.by(
+            Vector2(deltaX / 2, deltaY / 2 - jumpHeight),
+            EffectController(duration: jumpDuration / 2, curve: Curves.easeOutQuad),
+          ),
+          // Second half: Move the remaining halfway on X, and drop DOWN to the target Y
+          MoveEffect.by(
+            Vector2(deltaX / 2, deltaY / 2 + jumpHeight),
+            EffectController(duration: jumpDuration / 2, curve: Curves.easeInQuad),
+          ),
+        ],
+        onComplete: () {
+          if (_currentState == RhennePlayerCharacterState.die) return;
+          _currentState = RhennePlayerCharacterState.idle;
+          setAnimation(RhennePlayerCharacterState.idle);
+        },
+      ),
     );
   }
-
 }

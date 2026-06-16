@@ -3,9 +3,9 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
-import '../../../shared/collectibles_state.dart';
+import '../../../widgets/collectibles_state.dart';
 import '../../../core/lara_theme.dart';
-import '../../../shared/qr_unlock_state.dart';
+import '../../../widgets/qr_unlock_state.dart';
 
 // Y fraction where the ground strip begins (shared by ground and walkers).
 const _kGroundY = 0.88;
@@ -18,12 +18,12 @@ class NightSkyLayer extends PositionComponent with HasGameReference {
   static List<String> _unlockedSpriteNames() {
     final names = <String>[];
     for (var i = 0; i < CollectiblesState.count; i++) {
-      if (CollectiblesState.isUnlocked('rhenne', i))  names.add('rhenne_l${i + 1}.png');
-      if (CollectiblesState.isUnlocked('galleta', i)) names.add('galleta_l${i + 1}.png');
-      if (CollectiblesState.isUnlocked('heart', i))   names.add('corazon_l${i + 1}.png');
+      if (CollectiblesState.isUnlocked('rhenne', i))  names.add('collectibles/rhenne/rhenne_l${i + 1}.png');
+      if (CollectiblesState.isUnlocked('galleta', i)) names.add('collectibles/galleta/galleta_l${i + 1}.png');
+      if (CollectiblesState.isUnlocked('heart', i))   names.add('collectibles/heart/heart_l${i + 1}.png');
     }
     for (var i = 0; i < QrUnlockState.count; i++) {
-      if (QrUnlockState.isUnlocked(i)) names.add('lara_d${i + 1}.png');
+      if (QrUnlockState.isUnlocked(i)) names.add('collectibles/lara/lara_d${i + 1}.png');
     }
     if (names.isEmpty) names.addAll(['rhenne.png', 'galleta.png']);
     return names;

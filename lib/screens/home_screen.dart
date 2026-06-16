@@ -3,32 +3,30 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
+import 'package:lara_demo/shared/color_util.dart';
+import 'package:lara_demo/widgets/badges/countdown_badge.dart';
+import 'package:lara_demo/widgets/buttons/inline_coin_button.dart';
+import 'package:lara_demo/widgets/buttons/unlock_button.dart';
+import 'package:lara_demo/widgets/coin_display.dart';
+import 'package:lara_demo/widgets/badges/cost_badge.dart';
 
 import 'collectibles_screen.dart';
 import 'concert_screen.dart';
 import '../matilda_screen.dart';
 import '../widgets/coin_wallet.dart';
 import '../widgets/daily_bonus_dialog.dart';
-import '../shared/game_unlock_state.dart';
-import '../games/galleta_run/galleta_run_game.dart';
-import '../games/galleta_run/leaderboard_overlay.dart';
+import '../widgets/game_unlock_state.dart';
+import '../games/galleta_runs_game.dart';
 import '../games/memory_match/memory_match_game.dart';
 import '../games/memory_match/memory_match_leaderboard_overlay.dart';
-import '../games/rhenne_jumps/rhenne_jumps_game.dart';
-import '../games/rhythm_tap/rhythm_tap_game.dart';
+import '../games/rhenne_jumps_game.dart';
 import '../games/tap_the_heart/tap_heart_game.dart';
 import '../games/tap_the_heart/tap_heart_leaderboard_overlay.dart';
-import '../widgets/coin_shop.dart';
 import '../core/game_scaffold.dart';
 import '../core/lara_audio.dart';
 import '../widgets/lara_button.dart';
 import '../core/lara_base_game.dart';
 import '../core/lara_theme.dart';
-
-Color _darken(Color c) {
-  final hsl = HSLColor.fromColor(c);
-  return hsl.withLightness((hsl.lightness * 0.55).clamp(0.0, 1.0)).toColor();
-}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -49,95 +47,77 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  void _onHeaderTap() {
-    setState(() => _headerTaps++);
-    if (_headerTaps == 10) {
-      setState(() => _allVisible = true);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Modo desarrollador activado'), duration: Duration(seconds: 2)));
-    }
-  }
-
   List<_GameTile> get _visibleTiles {
     final always = [
-      // Rhenné Nada hidden — keep entry below when ready to re-enable
-      // _GameTile(
-      //   title: 'Rhenné Nada',
-      //   tagline: '¡Ayúda a Rhenné a cruzar el estanque nadando hasta Lara!',
-      //   spriteAsset: 'rhenne_swim_1.png',
-      //   color: const Color(0xFF0B4D7A),
-      //   builder: RhenneNadaGame.new,
-      //   coinReward: (g) => (g as RhenneNadaGame).coinsCollected,
-      // ),
       _GameTile(
         title: 'Rhenné Brinca',
         tagline: '¡Rhenné brinca entre lirios — esquiva la lluvia y atrapa luciérnagas!',
-        spriteAsset: 'rhenne_swim_1.png',
+        spriteAsset: 'assets/images/icons/icon_rhenne.png',
         color: LaraColors.rhenneGreen,
         builder: () => RhenneJumpsGame(), // RhenneJumpsGame.new,
         // coinReward: (g) => (g as RhenneJumpsGame).coinsCollected,
       ),
-      // _GameTile(
-      //   title: 'Galleta Corre',
-      //   tagline: '¡Galleta se perdió — ayúdala llegar al concierto de Lara!',
-      //   spriteAsset: 'galleta.png',
-      //   color: LaraColors.galletaBrown,
-      //   builder: GalletaRunGame.new,
-      //   coinReward: (g) => (g as GalletaRunGame).coinsCollected,
-      //   gameOverBuilder: (context, game, restart, home) {
-      //     final run = game as GalletaRunGame;
-      //     return GalletaRunLeaderboardOverlay(
-      //       finalScore: run.score,
-      //       justPlayed: run.lastEntry,
-      //       onRestart: restart,
-      //       onHome: home,
-      //     );
-      //   },
-      // ),
-      // _GameTile(
-      //   title: 'Memoria Amigos',
-      //   tagline: '¡Lara escondió fotos de sus amigos — encuéntralas en parejas!',
-      //   spriteAsset: 'card_back.png',
-      //   color: LaraColors.pink,
-      //   unlockKey: 'memory_match',
-      //   scoreLabel: 'Movimientos',
-      //   builder: MemoryMatchGame.new,
-      //   coinReward: (g) => (g as MemoryMatchGame).coinsCollected,
-      //   gameOverBuilder: (context, game, restart, home) {
-      //     final mem = game as MemoryMatchGame;
-      //     return MemoryMatchLeaderboardOverlay(
-      //       finalMoves: mem.lastEntry?.moves ?? 0,
-      //       justPlayed: mem.lastEntry,
-      //       onRestart: restart,
-      //       onHome: home,
-      //     );
-      //   },
-      //   additionalOverlays: {
-      //     'difficultyConfirm': (context, game) {
-      //       final g = game as MemoryMatchGame;
-      //       return _DifficultyConfirmOverlay(onConfirm: g.confirmDifficulty, onCancel: g.cancelDifficulty);
-      //     },
-      //   },
-      // ),
-      // _GameTile(
-      //   title: 'Atrapa Corazones',
-      //   tagline: '¡Lara lanzó sus corazones al público — no dejes caer ninguno!',
-      //   spriteAsset: 'corazon.png',
-      //   color: LaraColors.corazonRed,
-      //   timeLockUntil: DateTime(2026, 5, 27),
-      //   builder: TapHeartGame.new,
-      //   coinReward: (g) => (g as TapHeartGame).coinsCollected,
-      //   gameOverBuilder: (context, game, restart, home) {
-      //     final tap = game as TapHeartGame;
-      //     return TapHeartLeaderboardOverlay(
-      //       finalScore: tap.lastEntry?.score ?? 0,
-      //       justPlayed: tap.lastEntry,
-      //       onRestart: restart,
-      //       onHome: home,
-      //     );
-      //   },
-      // ),
+      _GameTile(
+        title: 'Galleta Corre',
+        tagline: '¡Galleta se perdió — ayúdala llegar al concierto de Lara!',
+        spriteAsset: 'assets/images/icons/icon_galleta.png',
+        color: LaraColors.galletaBrown,
+        builder: () => GalletaRunsGame(),
+        // coinReward: (g) => (g as GalletaRunsGame).coinsCollected,
+        // gameOverBuilder: (context, game, restart, home) {
+        //   final run = game as GalletaRunsGame;
+        //   return GalletaRunLeaderboardOverlay(
+        //     finalScore: run.score,
+        //     justPlayed: run.lastEntry,
+        //     onRestart: restart,
+        //     onHome: home,
+        //   );
+        // },
+      ),
+      _GameTile(
+        title: 'Memoria Amigos',
+        tagline: '¡Lara escondió fotos de sus amigos — encuéntralas en parejas!',
+        spriteAsset: 'assets/images/card_back.png',
+        color: LaraColors.pink,
+        unlockKey: 'memory_match',
+        scoreLabel: 'Movimientos',
+        builder: MemoryMatchGame.new,
+        coinReward: (g) => 1,
+        gameOverBuilder: (context, game, restart, home) {
+          final mem = game as MemoryMatchGame;
+          return MemoryMatchLeaderboardOverlay(
+            finalMoves: mem.lastEntry?.moves ?? 0,
+            justPlayed: mem.lastEntry,
+            onRestart: restart,
+            onHome: home,
+          );
+        },
+        additionalOverlays: {
+          'difficultyConfirm': (context, game) {
+            final g = game as MemoryMatchGame;
+            return _DifficultyConfirmOverlay(onConfirm: g.confirmDifficulty, onCancel: g.cancelDifficulty);
+          },
+        },
+      ),
+      _GameTile(
+        title: 'Atrapa Corazones',
+        tagline: '¡Lara lanzó sus corazones al público — no dejes caer ninguno!',
+        // spriteAsset: 'corazon.png',
+        spriteAsset: 'assets/images/collectibles/heart/heart_l3.png',
+        color: LaraColors.corazonRed,
+        timeLockUntil: DateTime.now().add(Duration(days: 7)),
+        builder: TapHeartGame.new,
+        coinReward: (g) => (g as TapHeartGame).coinsCollected,
+        gameOverBuilder: (context, game, restart, home) {
+          final tap = game as TapHeartGame;
+          return TapHeartLeaderboardOverlay(
+            finalScore: tap.lastEntry?.score ?? 0,
+            justPlayed: tap.lastEntry,
+            onRestart: restart,
+            onHome: home,
+          );
+        },
+      ),
     ];
 
     if (!_allVisible) return always;
@@ -146,10 +126,11 @@ class _HomeScreenState extends State<HomeScreen> {
       _GameTile(
         title: 'Rhenné Salta',
         tagline: '¡Rhenné quiere ver a Reina — ayúdale a cruzar los lirios!',
-        spriteAsset: 'rhenne.png',
+        // spriteAsset: 'rhenne.png',
+        spriteAsset: '/images/collectibles/galleta/galleta_l1.png',
         color: LaraColors.rhenneGreen,
         builder: RhenneJumpsGame.new,
-        coinReward: (g) => 1 + (g.score > 10 ? 1 : 0),
+        coinReward: (g) => 1 + (g.points > 10 ? 1 : 0),
       ),
       ...always,
       // _GameTile(
@@ -203,8 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: CustomScrollView(
             slivers: [
               const SliverToBoxAdapter(child: SizedBox(height: 12)),
-              const SliverToBoxAdapter(child: _CoinDisplay()),
-              SliverToBoxAdapter(child: _Header(onTap: _onHeaderTap)),
+              const SliverToBoxAdapter(child: CoinDisplay()),
               const SliverToBoxAdapter(child: _MatildaBanner()),
               const SliverToBoxAdapter(child: _AdBanner()),
               const SliverToBoxAdapter(child: _SectionDivider()),
@@ -368,7 +348,6 @@ class _GameTileCardState extends State<_GameTileCard> with SingleTickerProviderS
             builder: widget.tile.builder,
             gameOverBuilder: widget.tile.gameOverBuilder,
             scoreLabel: widget.tile.scoreLabel,
-            coinReward: widget.tile.coinReward,
             additionalOverlays: widget.tile.additionalOverlays,
           ),
         ),
@@ -411,7 +390,11 @@ class _GameTileCardState extends State<_GameTileCard> with SingleTickerProviderS
             color: widget.tile.color,
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
-              BoxShadow(offset: Offset(0, _pressed ? 0 : _depth), blurRadius: 0, color: _darken(widget.tile.color)),
+              BoxShadow(
+                offset: Offset(0, _pressed ? 0 : _depth),
+                blurRadius: 0,
+                color: ColorUtil.darken(widget.tile.color),
+              ),
             ],
           ),
           child: Padding(
@@ -430,7 +413,7 @@ class _GameTileCardState extends State<_GameTileCard> with SingleTickerProviderS
                       padding: const EdgeInsets.all(8),
                       child: Opacity(
                         opacity: _isLocked ? 0.45 : 1.0,
-                        child: Image.asset('assets/images/${widget.tile.spriteAsset}', fit: BoxFit.contain),
+                        child: Image.asset(widget.tile.spriteAsset, fit: BoxFit.contain),
                       ),
                     ),
                     if (_isLocked)
@@ -466,10 +449,10 @@ class _GameTileCardState extends State<_GameTileCard> with SingleTickerProviderS
                       ),
                       if (_isTimeLocked) ...[
                         const SizedBox(height: 6),
-                        _CountdownBadge(countdown: _formatCountdown()),
+                        CountdownBadge(countdown: _formatCountdown()),
                       ] else if (_isCoinLocked) ...[
                         const SizedBox(height: 6),
-                        _CostBadge(cost: GameUnlockState.costs[widget.tile.unlockKey]!),
+                        CostBadge(cost: GameUnlockState.costs[widget.tile.unlockKey]!),
                       ],
                     ],
                   ),
@@ -480,69 +463,6 @@ class _GameTileCardState extends State<_GameTileCard> with SingleTickerProviderS
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-// ─── Locked-game cost badge ───────────────────────────────────────────────────
-
-class _CostBadge extends StatelessWidget {
-  const _CostBadge({required this.cost});
-
-  final int cost;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-      decoration: BoxDecoration(
-        color: LaraColors.yellow,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: LaraColors.galletaBrown, width: 1.5),
-        boxShadow: const [BoxShadow(offset: Offset(0, 2), blurRadius: 0, color: LaraColors.galletaBrown)],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.monetization_on_rounded, color: LaraColors.galletaBrown, size: 14),
-          const SizedBox(width: 3),
-          Text(
-            '$cost',
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: LaraColors.galletaBrown),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Time-lock countdown badge ────────────────────────────────────────────────
-
-class _CountdownBadge extends StatelessWidget {
-  const _CountdownBadge({required this.countdown});
-
-  final String countdown;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.28),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white38, width: 1.5),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.timer_rounded, color: Colors.white70, size: 14),
-          const SizedBox(width: 4),
-          Text(
-            countdown,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white),
-          ),
-        ],
       ),
     );
   }
@@ -591,7 +511,7 @@ class _GamePurchaseSheet extends StatelessWidget {
                       borderRadius: BorderRadius.circular(14),
                     ),
                     padding: const EdgeInsets.all(8),
-                    child: Image.asset('assets/images/${tile.spriteAsset}', fit: BoxFit.contain),
+                    child: Image.asset(tile.spriteAsset, fit: BoxFit.contain),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -652,14 +572,14 @@ class _GamePurchaseSheet extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 12),
-                _InlineCoinButton(amount: 100, color: LaraColors.rhenneGreen, shadowColor: LaraColors.rhenneGreenDark),
+                InlineCoinButton(amount: 100, color: LaraColors.rhenneGreen, shadowColor: LaraColors.rhenneGreenDark),
                 const SizedBox(height: 10),
-                _InlineCoinButton(amount: 500, color: LaraColors.magenta, shadowColor: LaraColors.magentaDark),
+                InlineCoinButton(amount: 500, color: LaraColors.magenta, shadowColor: LaraColors.magentaDark),
                 const SizedBox(height: 20),
               ],
               // Unlock button — shown only when player can afford
               if (canAfford) ...[
-                _UnlockButton(
+                UnlockButton(
                   color: tile.color,
                   onTap: () {
                     LaraAudio.playSfx(LaraSfx.unlock);
@@ -684,216 +604,7 @@ class _GamePurchaseSheet extends StatelessWidget {
   }
 }
 
-// ─── Inline coin purchase button (used inside _GamePurchaseSheet) ─────────────
-
-class _InlineCoinButton extends StatefulWidget {
-  const _InlineCoinButton({required this.amount, required this.color, required this.shadowColor});
-
-  final int amount;
-  final Color color;
-  final Color shadowColor;
-
-  @override
-  State<_InlineCoinButton> createState() => _InlineCoinButtonState();
-}
-
-class _InlineCoinButtonState extends State<_InlineCoinButton> {
-  bool _pressed = false;
-  static const _depth = 5.0;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) {
-        setState(() => _pressed = false);
-        LaraAudio.playSfx(LaraSfx.button);
-        CoinWallet.add(widget.amount);
-        LaraAudio.playSfx(LaraSfx.coin);
-      },
-      onTapCancel: () => setState(() => _pressed = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 70),
-        curve: Curves.easeOut,
-        transform: Matrix4.translationValues(0, _pressed ? _depth : 0, 0),
-        decoration: BoxDecoration(
-          color: widget.color,
-          borderRadius: BorderRadius.circular(28),
-          border: Border.all(color: widget.shadowColor, width: 3),
-          boxShadow: [BoxShadow(offset: Offset(0, _pressed ? 0 : _depth), blurRadius: 0, color: widget.shadowColor)],
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.25), shape: BoxShape.circle),
-              child: const Icon(Icons.monetization_on_rounded, color: Colors.white, size: 28),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${widget.amount} monedas',
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white),
-                  ),
-                  Text(
-                    widget.amount == 500 ? '¡Mejor valor!' : 'Paquete básico',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white.withValues(alpha: 0.85),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.star_rounded, color: Colors.white, size: 28),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Unlock button ────────────────────────────────────────────────────────────
-
-class _UnlockButton extends StatefulWidget {
-  const _UnlockButton({required this.color, required this.onTap});
-
-  final Color color;
-  final VoidCallback onTap;
-
-  @override
-  State<_UnlockButton> createState() => _UnlockButtonState();
-}
-
-class _UnlockButtonState extends State<_UnlockButton> {
-  bool _pressed = false;
-  static const _depth = 5.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final shadowColor = _darken(widget.color);
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) {
-        setState(() => _pressed = false);
-        widget.onTap();
-      },
-      onTapCancel: () => setState(() => _pressed = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 70),
-        curve: Curves.easeOut,
-        transform: Matrix4.translationValues(0, _pressed ? _depth : 0, 0),
-        decoration: BoxDecoration(
-          color: widget.color,
-          borderRadius: BorderRadius.circular(28),
-          border: Border.all(color: shadowColor, width: 3),
-          boxShadow: [BoxShadow(offset: Offset(0, _pressed ? 0 : _depth), blurRadius: 0, color: shadowColor)],
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.lock_open_rounded, color: Colors.white, size: 24),
-            SizedBox(width: 10),
-            Text(
-              '¡Desbloquear!',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 0.5),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 // ─── Coin display + mute toggle row ──────────────────────────────────────────
-
-class _CoinDisplay extends StatelessWidget {
-  const _CoinDisplay();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          GestureDetector(
-            onTap: () => showCoinShop(context),
-            child: ValueListenableBuilder<int>(
-              valueListenable: CoinWallet.balance,
-              builder: (context, balance, _) => Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-                decoration: BoxDecoration(
-                  color: LaraColors.yellow,
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: LaraColors.galletaBrown, width: 2),
-                  boxShadow: const [BoxShadow(offset: Offset(0, 3), blurRadius: 0, color: LaraColors.galletaBrown)],
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.monetization_on_rounded, color: LaraColors.galletaBrown, size: 22),
-                    const SizedBox(width: 6),
-                    Text(
-                      '$balance',
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: LaraColors.galletaBrown),
-                    ),
-                    const SizedBox(width: 8),
-                    const Icon(Icons.add_circle_rounded, color: LaraColors.galletaBrown, size: 18),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const _MuteButton(),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Mute toggle button ───────────────────────────────────────────────────────
-
-class _MuteButton extends StatefulWidget {
-  const _MuteButton();
-
-  @override
-  State<_MuteButton> createState() => _MuteButtonState();
-}
-
-class _MuteButtonState extends State<_MuteButton> {
-  static IconData _icon(AudioMode m) => switch (m) {
-    AudioMode.on => Icons.volume_up_rounded,
-    AudioMode.bgmOff => Icons.music_off_rounded,
-    AudioMode.off => Icons.volume_off_rounded,
-  };
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        LaraAudio.cycleMode();
-        setState(() {});
-      },
-      child: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.25),
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 2),
-        ),
-        child: Icon(_icon(LaraAudio.mode), color: Colors.white, size: 22),
-      ),
-    );
-  }
-}
 
 // ─── Ad banner ────────────────────────────────────────────────────────────────
 
@@ -927,7 +638,11 @@ class _AdBannerState extends State<_AdBanner> {
             color: LaraColors.magenta,
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
-              BoxShadow(offset: Offset(0, _pressed ? 0 : _depth), blurRadius: 0, color: _darken(LaraColors.magenta)),
+              BoxShadow(
+                offset: Offset(0, _pressed ? 0 : _depth),
+                blurRadius: 0,
+                color: ColorUtil.darken(LaraColors.magenta),
+              ),
             ],
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -1051,7 +766,11 @@ class _CollectiblesBannerState extends State<_CollectiblesBanner> {
             gradient: LaraGradients.pond,
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
-              BoxShadow(offset: Offset(0, _pressed ? 0 : _depth), blurRadius: 0, color: _darken(LaraColors.mint)),
+              BoxShadow(
+                offset: Offset(0, _pressed ? 0 : _depth),
+                blurRadius: 0,
+                color: ColorUtil.darken(LaraColors.mint),
+              ),
             ],
           ),
           padding: const EdgeInsets.all(12),
@@ -1065,7 +784,8 @@ class _CollectiblesBannerState extends State<_CollectiblesBanner> {
                   borderRadius: BorderRadius.circular(18),
                 ),
                 padding: const EdgeInsets.all(6),
-                child: Image.asset('assets/images/collectibles_icon.png', fit: BoxFit.contain),
+
+                child: Image.asset('assets/images/icons/icon_collectibles.png', fit: BoxFit.contain),
               ),
               const SizedBox(width: 14),
               const Expanded(

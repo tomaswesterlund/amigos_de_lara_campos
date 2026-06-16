@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import '../widgets/coin_shop.dart';
 import '../widgets/coin_wallet.dart';
 import '../core/lara_audio.dart';
-import '../shared/collectibles_state.dart';
+import '../widgets/collectibles_state.dart';
 import '../widgets/lara_button.dart';
 import '../core/lara_theme.dart';
-import '../shared/qr_unlock_state.dart';
+import '../widgets/qr_unlock_state.dart';
 
 Color _darken(Color c) {
   final hsl = HSLColor.fromColor(c);
@@ -60,11 +60,7 @@ class _CollectiblesScreenState extends State<CollectiblesScreen> {
 
 // ─── Shared detail dialog ─────────────────────────────────────────────────────
 
-void _showCollectibleDetail(
-  BuildContext context,
-  String assetPath,
-  String label,
-) {
+void _showCollectibleDetail(BuildContext context, String assetPath, String label) {
   showDialog<void>(
     context: context,
     builder: (ctx) => Dialog(
@@ -74,9 +70,7 @@ void _showCollectibleDetail(
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(32),
-          boxShadow: const [
-            BoxShadow(offset: Offset(0, 8), blurRadius: 0, color: LaraColors.ink),
-          ],
+          boxShadow: const [BoxShadow(offset: Offset(0, 8), blurRadius: 0, color: LaraColors.ink)],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -93,26 +87,16 @@ void _showCollectibleDetail(
                     shape: BoxShape.circle,
                     border: Border.all(color: LaraColors.galletaBrown, width: 1.5),
                   ),
-                  child: const Icon(Icons.close_rounded,
-                      size: 18, color: LaraColors.ink),
+                  child: const Icon(Icons.close_rounded, size: 18, color: LaraColors.ink),
                 ),
               ),
             ),
             const SizedBox(height: 8),
-            Image.asset(
-              assetPath,
-              width: 200,
-              height: 200,
-              fit: BoxFit.contain,
-            ),
+            Image.asset(assetPath, width: 200, height: 200, fit: BoxFit.contain),
             const SizedBox(height: 16),
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w900,
-                color: LaraColors.magenta,
-              ),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: LaraColors.magenta),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
@@ -120,16 +104,12 @@ void _showCollectibleDetail(
               width: double.infinity,
               child: ElevatedButton.icon(
                 icon: const Icon(Icons.share_rounded),
-                label: const Text(
-                  'Compartir',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
-                ),
+                label: const Text('Compartir', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: LaraColors.pink,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   elevation: 0,
                 ),
                 onPressed: () {},
@@ -161,37 +141,19 @@ class _CoinStrip extends StatelessWidget {
                 color: LaraColors.yellow,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: LaraColors.galletaBrown, width: 2),
-                boxShadow: const [
-                  BoxShadow(
-                    offset: Offset(0, 2),
-                    blurRadius: 0,
-                    color: LaraColors.galletaBrown,
-                  ),
-                ],
+                boxShadow: const [BoxShadow(offset: Offset(0, 2), blurRadius: 0, color: LaraColors.galletaBrown)],
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.monetization_on_rounded,
-                    color: LaraColors.galletaBrown,
-                    size: 20,
-                  ),
+                  const Icon(Icons.monetization_on_rounded, color: LaraColors.galletaBrown, size: 20),
                   const SizedBox(width: 6),
                   Text(
                     '$balance',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                      color: LaraColors.galletaBrown,
-                    ),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: LaraColors.galletaBrown),
                   ),
                   const SizedBox(width: 6),
-                  const Icon(
-                    Icons.add_circle_rounded,
-                    color: LaraColors.galletaBrown,
-                    size: 16,
-                  ),
+                  const Icon(Icons.add_circle_rounded, color: LaraColors.galletaBrown, size: 16),
                 ],
               ),
             ),
@@ -228,20 +190,11 @@ class _LaraSection extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: _borderGradient,
         borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            offset: const Offset(0, 5),
-            blurRadius: 0,
-            color: _darken(LaraColors.magenta),
-          ),
-        ],
+        boxShadow: [BoxShadow(offset: const Offset(0, 5), blurRadius: 0, color: _darken(LaraColors.magenta))],
       ),
       padding: const EdgeInsets.all(3),
       child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(21),
-        ),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(21)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -266,10 +219,7 @@ class _LaraSection extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     padding: const EdgeInsets.all(5),
-                    child: Image.asset(
-                      'assets/images/lara_d1.png',
-                      fit: BoxFit.contain,
-                    ),
+                    child: Image.asset('assets/images/collectibles/lara/lara_d1.png', fit: BoxFit.contain),
                   ),
                   const SizedBox(width: 10),
                   const Icon(Icons.star_rounded, color: LaraColors.yellow, size: 18),
@@ -280,13 +230,7 @@ class _LaraSection extends StatelessWidget {
                       fontSize: 22,
                       fontWeight: FontWeight.w900,
                       color: Colors.white,
-                      shadows: [
-                        Shadow(
-                          offset: Offset(0, 2),
-                          blurRadius: 0,
-                          color: LaraColors.ink,
-                        ),
-                      ],
+                      shadows: [Shadow(offset: Offset(0, 2), blurRadius: 0, color: LaraColors.ink)],
                     ),
                   ),
                   const SizedBox(width: 6),
@@ -298,22 +242,15 @@ class _LaraSection extends StatelessWidget {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(
-                color: LaraColors.pink.withValues(alpha: 0.10),
-              ),
+              decoration: BoxDecoration(color: LaraColors.pink.withValues(alpha: 0.10)),
               child: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.qr_code_2_rounded,
-                      size: 18, color: LaraColors.magenta),
+                  Icon(Icons.qr_code_2_rounded, size: 18, color: LaraColors.magenta),
                   SizedBox(width: 6),
                   Text(
                     'Desbloquea con el código QR de tu muñeca',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: LaraColors.magenta,
-                    ),
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: LaraColors.magenta),
                   ),
                 ],
               ),
@@ -331,10 +268,7 @@ class _LaraSection extends StatelessWidget {
                         children: [
                           for (int i = 0; i < _dolls.length; i++)
                             Padding(
-                              padding: EdgeInsets.only(
-                                right: i < _dolls.length - 1 ? 12 : 0,
-                                top: 8,
-                              ),
+                              padding: EdgeInsets.only(right: i < _dolls.length - 1 ? 12 : 0, top: 8),
                               child: _LaraCard(
                                 index: i,
                                 dollLabel: _dolls[i].label,
@@ -357,18 +291,11 @@ class _LaraSection extends StatelessWidget {
                           gradient: LinearGradient(
                             begin: Alignment.centerLeft,
                             end: Alignment.centerRight,
-                            colors: [
-                              Colors.white.withValues(alpha: 0),
-                              Colors.white.withValues(alpha: 0.97),
-                            ],
+                            colors: [Colors.white.withValues(alpha: 0), Colors.white.withValues(alpha: 0.97)],
                           ),
                         ),
                         child: const Center(
-                          child: Icon(
-                            Icons.chevron_right_rounded,
-                            color: LaraColors.magenta,
-                            size: 30,
-                          ),
+                          child: Icon(Icons.chevron_right_rounded, color: LaraColors.magenta, size: 30),
                         ),
                       ),
                     ),
@@ -402,8 +329,7 @@ class _LaraCard extends StatefulWidget {
   State<_LaraCard> createState() => _LaraCardState();
 }
 
-class _LaraCardState extends State<_LaraCard>
-    with SingleTickerProviderStateMixin {
+class _LaraCardState extends State<_LaraCard> with SingleTickerProviderStateMixin {
   late final AnimationController _bounceCtrl;
   late final Animation<double> _bounceScale;
 
@@ -416,10 +342,7 @@ class _LaraCardState extends State<_LaraCard>
   @override
   void initState() {
     super.initState();
-    _bounceCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
+    _bounceCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
     _bounceScale = TweenSequence<double>([
       TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.25), weight: 40),
       TweenSequenceItem(tween: Tween(begin: 1.25, end: 0.92), weight: 30),
@@ -435,11 +358,7 @@ class _LaraCardState extends State<_LaraCard>
 
   void _onTap() {
     if (QrUnlockState.isUnlocked(widget.index)) {
-      _showCollectibleDetail(
-        context,
-        'assets/images/${widget.assetBase}.png',
-        widget.dollLabel,
-      );
+      _showCollectibleDetail(context, 'assets/images/collectibles/lara/${widget.assetBase}.png', widget.dollLabel);
     } else {
       _showQrDialog();
     }
@@ -458,35 +377,20 @@ class _LaraCardState extends State<_LaraCard>
           children: [
             Container(
               padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: LaraColors.pink.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.qr_code_scanner_rounded,
-                color: LaraColors.magenta,
-                size: 52,
-              ),
+              decoration: BoxDecoration(color: LaraColors.pink.withValues(alpha: 0.12), shape: BoxShape.circle),
+              child: const Icon(Icons.qr_code_scanner_rounded, color: LaraColors.magenta, size: 52),
             ),
             const SizedBox(height: 12),
             const Text(
               '¡Escanea tu muñeca!',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w900,
-                color: LaraColors.magenta,
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: LaraColors.magenta),
               textAlign: TextAlign.center,
             ),
           ],
         ),
         content: const Text(
           'Apunta la cámara al código QR de tu muñeca de Lara Campos para desbloquear este coleccionable.',
-          style: TextStyle(
-            fontSize: 14,
-            color: LaraColors.ink,
-            height: 1.5,
-          ),
+          style: TextStyle(fontSize: 14, color: LaraColors.ink, height: 1.5),
           textAlign: TextAlign.center,
         ),
         actions: [
@@ -494,17 +398,10 @@ class _LaraCardState extends State<_LaraCard>
             onPressed: () => Navigator.of(ctx).pop(false),
             child: const Text(
               'Cancelar',
-              style: TextStyle(
-                color: LaraColors.galletaBrown,
-                fontWeight: FontWeight.w700,
-              ),
+              style: TextStyle(color: LaraColors.galletaBrown, fontWeight: FontWeight.w700),
             ),
           ),
-          LaraButton(
-            label: 'Escanear',
-            color: LaraColors.pink,
-            onPressed: () => Navigator.of(ctx).pop(true),
-          ),
+          LaraButton(label: 'Escanear', color: LaraColors.pink, onPressed: () => Navigator.of(ctx).pop(true)),
         ],
       ),
     ).then((ok) {
@@ -525,8 +422,7 @@ class _LaraCardState extends State<_LaraCard>
       onTap: _onTap,
       child: AnimatedBuilder(
         animation: _bounceScale,
-        builder: (context, child) =>
-            Transform.scale(scale: _bounceScale.value, child: child),
+        builder: (context, child) => Transform.scale(scale: _bounceScale.value, child: child),
         child: Stack(
           clipBehavior: Clip.none,
           children: [
@@ -535,11 +431,7 @@ class _LaraCardState extends State<_LaraCard>
               height: 145,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: gradColors,
-                ),
+                gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: gradColors),
               ),
               padding: const EdgeInsets.all(3),
               child: ClipRRect(
@@ -551,7 +443,7 @@ class _LaraCardState extends State<_LaraCard>
                       color: LaraColors.cream,
                       padding: const EdgeInsets.all(10),
                       child: Image.asset(
-                        'assets/images/${widget.assetBase}.png',
+                        'assets/images/collectibles/lara/${widget.assetBase}.png',
                         fit: BoxFit.contain,
                       ),
                     ),
@@ -561,23 +453,17 @@ class _LaraCardState extends State<_LaraCard>
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.qr_code_2_rounded,
-                                color: Colors.white, size: 34),
+                            const Icon(Icons.qr_code_2_rounded, color: Colors.white, size: 34),
                             const SizedBox(height: 6),
                             Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
                                 color: LaraColors.pink,
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Text(
                                 '¡Escanear!',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.white,
-                                ),
+                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Colors.white),
                               ),
                             ),
                           ],
@@ -602,23 +488,12 @@ class _LaraCardState extends State<_LaraCard>
                     end: Alignment.bottomRight,
                   ),
                   border: Border.all(color: Colors.white, width: 2),
-                  boxShadow: const [
-                    BoxShadow(
-                      offset: Offset(0, 2),
-                      blurRadius: 0,
-                      color: LaraColors.ink,
-                    ),
-                  ],
+                  boxShadow: const [BoxShadow(offset: Offset(0, 2), blurRadius: 0, color: LaraColors.ink)],
                 ),
                 child: Center(
                   child: Text(
                     '${widget.index + 1}',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                      height: 1,
-                    ),
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: Colors.white, height: 1),
                   ),
                 ),
               ),
@@ -645,8 +520,6 @@ class _CharacterSection extends StatelessWidget {
   final Color accentColor;
   final VoidCallback onUnlockAttempt;
 
-  String get _baseAsset => charKey == 'heart' ? 'corazon' : charKey;
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -655,13 +528,7 @@ class _CharacterSection extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: accentColor, width: 3),
-        boxShadow: [
-          BoxShadow(
-            offset: const Offset(0, 5),
-            blurRadius: 0,
-            color: _darken(accentColor),
-          ),
-        ],
+        boxShadow: [BoxShadow(offset: const Offset(0, 5), blurRadius: 0, color: _darken(accentColor))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -682,10 +549,7 @@ class _CharacterSection extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   padding: const EdgeInsets.all(5),
-                  child: Image.asset(
-                    'assets/images/${_baseAsset}_l1.png',
-                    fit: BoxFit.contain,
-                  ),
+                  child: Image.asset('assets/images/collectibles/$charKey/${charKey}_l1.png', fit: BoxFit.contain),
                 ),
                 const SizedBox(width: 10),
                 Text(
@@ -694,12 +558,7 @@ class _CharacterSection extends StatelessWidget {
                     fontSize: 22,
                     fontWeight: FontWeight.w900,
                     color: Colors.white,
-                    shadows: [
-                      Shadow(
-                          offset: Offset(0, 2),
-                          blurRadius: 0,
-                          color: LaraColors.ink),
-                    ],
+                    shadows: [Shadow(offset: Offset(0, 2), blurRadius: 0, color: LaraColors.ink)],
                   ),
                 ),
               ],
@@ -717,15 +576,8 @@ class _CharacterSection extends StatelessWidget {
                       children: [
                         for (int i = 0; i < CollectiblesState.count; i++)
                           Padding(
-                            padding: EdgeInsets.only(
-                              right: i < CollectiblesState.count - 1 ? 12 : 0,
-                              top: 8,
-                            ),
-                            child: _CollectibleCard(
-                              charKey: charKey,
-                              index: i,
-                              onUnlockAttempt: onUnlockAttempt,
-                            ),
+                            padding: EdgeInsets.only(right: i < CollectiblesState.count - 1 ? 12 : 0, top: 8),
+                            child: _CollectibleCard(charKey: charKey, index: i, onUnlockAttempt: onUnlockAttempt),
                           ),
                       ],
                     ),
@@ -742,19 +594,10 @@ class _CharacterSection extends StatelessWidget {
                         gradient: LinearGradient(
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
-                          colors: [
-                            Colors.white.withValues(alpha: 0),
-                            Colors.white.withValues(alpha: 0.97),
-                          ],
+                          colors: [Colors.white.withValues(alpha: 0), Colors.white.withValues(alpha: 0.97)],
                         ),
                       ),
-                      child: Center(
-                        child: Icon(
-                          Icons.chevron_right_rounded,
-                          color: accentColor,
-                          size: 30,
-                        ),
-                      ),
+                      child: Center(child: Icon(Icons.chevron_right_rounded, color: accentColor, size: 30)),
                     ),
                   ),
                 ),
@@ -770,11 +613,7 @@ class _CharacterSection extends StatelessWidget {
 // ─── Collectible card ─────────────────────────────────────────────────────────
 
 class _CollectibleCard extends StatefulWidget {
-  const _CollectibleCard({
-    required this.charKey,
-    required this.index,
-    required this.onUnlockAttempt,
-  });
+  const _CollectibleCard({required this.charKey, required this.index, required this.onUnlockAttempt});
 
   final String charKey;
   final int index;
@@ -784,8 +623,7 @@ class _CollectibleCard extends StatefulWidget {
   State<_CollectibleCard> createState() => _CollectibleCardState();
 }
 
-class _CollectibleCardState extends State<_CollectibleCard>
-    with SingleTickerProviderStateMixin {
+class _CollectibleCardState extends State<_CollectibleCard> with SingleTickerProviderStateMixin {
   late final AnimationController _bounceCtrl;
   late final Animation<double> _bounceScale;
 
@@ -800,10 +638,7 @@ class _CollectibleCardState extends State<_CollectibleCard>
   @override
   void initState() {
     super.initState();
-    _bounceCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
+    _bounceCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
     _bounceScale = TweenSequence<double>([
       TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.25), weight: 40),
       TweenSequenceItem(tween: Tween(begin: 1.25, end: 0.92), weight: 30),
@@ -819,11 +654,7 @@ class _CollectibleCardState extends State<_CollectibleCard>
 
   void _onTap() {
     if (CollectiblesState.isUnlocked(widget.charKey, widget.index)) {
-      _showCollectibleDetail(
-        context,
-        'assets/images/$_assetName.png',
-        _detailLabel,
-      );
+      _showCollectibleDetail(context, _assetName, _detailLabel);
     } else if (CoinWallet.balance.value >= CollectiblesState.costs[widget.index]) {
       _showUnlockDialog();
     } else {
@@ -857,30 +688,20 @@ class _CollectibleCardState extends State<_CollectibleCard>
         content: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.monetization_on_rounded,
-                color: LaraColors.galletaBrown),
+            const Icon(Icons.monetization_on_rounded, color: LaraColors.galletaBrown),
             const SizedBox(width: 6),
             Text(
               '$cost monedas',
-              style: const TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: 16,
-                color: LaraColors.ink,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: LaraColors.ink),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancelar',
-                style: TextStyle(color: LaraColors.galletaBrown)),
+            child: const Text('Cancelar', style: TextStyle(color: LaraColors.galletaBrown)),
           ),
-          LaraButton(
-            label: 'Desbloquear',
-            color: LaraColors.rhenneGreen,
-            onPressed: () => Navigator.of(ctx).pop(true),
-          ),
+          LaraButton(label: 'Desbloquear', color: LaraColors.rhenneGreen, onPressed: () => Navigator.of(ctx).pop(true)),
         ],
       ),
     ).then((confirmed) {
@@ -893,19 +714,13 @@ class _CollectibleCardState extends State<_CollectibleCard>
       } else {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('¡No tienes suficientes monedas!'),
-            duration: Duration(seconds: 2),
-          ),
+          const SnackBar(content: Text('¡No tienes suficientes monedas!'), duration: Duration(seconds: 2)),
         );
       }
     });
   }
 
-  String get _assetName {
-    final base = widget.charKey == 'heart' ? 'corazon' : widget.charKey;
-    return '${base}_l${widget.index + 1}';
-  }
+  String get _assetName => 'assets/images/collectibles/${widget.charKey}/${widget.charKey}_l${widget.index + 1}.png';
 
   @override
   Widget build(BuildContext context) {
@@ -920,116 +735,103 @@ class _CollectibleCardState extends State<_CollectibleCard>
         final canAfford = balance >= cost;
 
         return GestureDetector(
-      onTap: _onTap,
-      child: AnimatedBuilder(
-        animation: _bounceScale,
-        builder: (context, child) =>
-            Transform.scale(scale: _bounceScale.value, child: child),
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Container(
-              width: 110,
-              height: 145,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: gradColors,
-                ),
-              ),
-              padding: const EdgeInsets.all(3),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(17),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Container(
-                      color: LaraColors.cream,
-                      padding: const EdgeInsets.all(10),
-                      child: Image.asset(
-                        'assets/images/$_assetName.png',
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                    if (!unlocked)
-                      Container(
-                        color: LaraColors.ink.withValues(alpha: 0.65),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.lock_rounded,
-                                color: Colors.white, size: 34),
-                            if (canAfford) ...[
-                              const SizedBox(height: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: LaraColors.yellow,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(Icons.monetization_on_rounded,
-                                        color: LaraColors.galletaBrown, size: 14),
-                                    const SizedBox(width: 3),
-                                    Text(
-                                      '$cost',
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w900,
-                                        color: LaraColors.galletaBrown,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ],
+          onTap: _onTap,
+          child: AnimatedBuilder(
+            animation: _bounceScale,
+            builder: (context, child) => Transform.scale(scale: _bounceScale.value, child: child),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  width: 110,
+                  height: 145,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: gradColors),
+                  ),
+                  padding: const EdgeInsets.all(3),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(17),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Container(
+                          color: LaraColors.cream,
+                          padding: const EdgeInsets.all(10),
+                          child: Image.asset(_assetName, fit: BoxFit.contain),
                         ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-            Positioned(
-              top: -8,
-              left: -8,
-              child: Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: LaraColors.magenta,
-                  border: Border.all(color: Colors.white, width: 2),
-                  boxShadow: const [
-                    BoxShadow(
-                      offset: Offset(0, 2),
-                      blurRadius: 0,
-                      color: LaraColors.ink,
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: Text(
-                    '$level',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                      height: 1,
+                        if (!unlocked)
+                          Container(
+                            color: LaraColors.ink.withValues(alpha: 0.65),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.lock_rounded, color: Colors.white, size: 34),
+                                if (canAfford) ...[
+                                  const SizedBox(height: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: LaraColors.yellow,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(
+                                          Icons.monetization_on_rounded,
+                                          color: LaraColors.galletaBrown,
+                                          size: 14,
+                                        ),
+                                        const SizedBox(width: 3),
+                                        Text(
+                                          '$cost',
+                                          style: const TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w900,
+                                            color: LaraColors.galletaBrown,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),
-              ),
+                Positioned(
+                  top: -8,
+                  left: -8,
+                  child: Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: LaraColors.magenta,
+                      border: Border.all(color: Colors.white, width: 2),
+                      boxShadow: const [BoxShadow(offset: Offset(0, 2), blurRadius: 0, color: LaraColors.ink)],
+                    ),
+                    child: Center(
+                      child: Text(
+                        '$level',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                          height: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
+          ),
+        );
       },
     );
   }

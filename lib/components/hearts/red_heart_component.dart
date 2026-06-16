@@ -66,11 +66,12 @@
 
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flame_spine/flame_spine.dart';
 import 'package:lara_demo/core/constants.dart';
 
 class RedHeartComponent extends PositionComponent {
-  RedHeartComponent({required super.size});
+  RedHeartComponent({required super.size, super.position});
 
   late final SpineComponent _spine;
 
@@ -100,7 +101,7 @@ class RedHeartComponent extends PositionComponent {
     //   ),
     // );
 
-    await add(CircleHitbox(radius: size.y / 2, anchor: Anchor.center, position: size / 2 + Vector2(0, size.y * 0.1)));
+    await add(CircleHitbox(radius: size.y / 4, anchor: Anchor.center, position: size / 2 + Vector2(0, size.y * 0.1)));
 
     await add(_spine);
 
@@ -111,6 +112,15 @@ class RedHeartComponent extends PositionComponent {
     _spine.animationState.setAnimation(0, 'animation', true);
   }
 
-  @override
-  void onMount() {}
+  void move(Vector2 targetPosition, double duration) {
+    add(
+      MoveByEffect(
+        targetPosition,
+        EffectController(duration: duration),
+        onComplete: () {
+          removeFromParent();
+        },
+      ),
+    );
+  }
 }

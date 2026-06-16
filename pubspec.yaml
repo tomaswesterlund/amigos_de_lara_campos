@@ -1,5 +1,5 @@
 name: lara_demo
-description: "Six mini-games starring Lara Campos's companions, built with Flutter + Flame."
+description: "¡Mini-juegos con los amigos de Lara Campos!"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+3
+version: 1.0.0+5
 
 environment:
   sdk: ^3.11.3
@@ -41,6 +41,7 @@ dependencies:
   url_launcher: ^6.3.0
   youtube_player_iframe: ^6.0.0
   flame_spine: ^0.3.0+5
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
@@ -52,7 +53,6 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
-  flutter_launcher_icons: ^0.13.1
   flame_test: ^2.2.4
 
 # For information on the generic Dart part of this file, see the
@@ -68,6 +68,11 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/images/collectibles/galleta/
+    - assets/images/collectibles/heart/
+    - assets/images/collectibles/lara/
+    - assets/images/collectibles/rhenne/
+    - assets/images/icons/
     - assets/images/rhenne_brinca/idle/
     - assets/images/rhenne_brinca/jump/
     - assets/images/rhenne_brinca/die/
@@ -76,12 +81,16 @@ flutter:
     - assets/icon/
     - assets/sprites/
     - assets/sprites/acorn/
+    - assets/sprites/bird/
+    - assets/sprites/bone/
     - assets/sprites/branch/
     - assets/sprites/coin/
+    - assets/sprites/galleta/
     - assets/sprites/heart/
     - assets/sprites/honeycomb/
     - assets/sprites/lilypad/
     - assets/sprites/pinecone/
+    - assets/sprites/rock/
     - assets/sprites/rhenne/
     - assets/sprites/star/
 

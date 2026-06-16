@@ -111,6 +111,7 @@ abstract final class LaraSfx {
   static const hitGood    = 'audio/sfx/hit_good.m4a';
   static const miss       = 'audio/sfx/miss.m4a';
   static const coin       = 'audio/sfx/coin.m4a';
+  static const jump       = 'audio/sfx/jump.mp3';
   static const unlock     = 'audio/sfx/unlock.m4a';
   static const button     = 'audio/sfx/button.m4a';
 }
